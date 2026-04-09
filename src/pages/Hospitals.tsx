@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { hospitalData } from "@/data/hospitals";
+import { useHospitals } from "@/hooks/useHospitals";
 import type { Hospital } from "@/data/hospitals";
 import { haversineDistance, AMBULANCE_POSITION } from "@/lib/dijkstra";
 
@@ -116,6 +116,7 @@ function RatingStars({ rating }: { rating: number }) {
 /* ------------------------------------------------------------------ */
 
 const Hospitals = () => {
+  const { data: hospitalData = [] } = useHospitals();
   /* ---- state ---- */
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<HospitalType>("all");
@@ -154,7 +155,7 @@ const Hospitals = () => {
         ...h,
         liveDistance: haversineDistance(userPos[0], userPos[1], h.lat, h.lng),
       })),
-    [userPos]
+    [userPos, hospitalData]
   );
 
   /* ---- filtered & sorted list ---- */

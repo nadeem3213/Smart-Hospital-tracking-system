@@ -19,64 +19,7 @@ interface CaseRecord {
   status: "Completed" | "In Progress" | "Pending";
 }
 
-const MOCK_CASES: CaseRecord[] = [
-  {
-    caseId: "EMG101",
-    type: "Cardiac",
-    hospital: "City General Hospital",
-    time: "10:32 AM",
-    status: "Completed",
-  },
-  {
-    caseId: "EMG102",
-    type: "Accident",
-    hospital: "Apollo Medical Center",
-    time: "2:15 PM",
-    status: "Completed",
-  },
-  {
-    caseId: "EMG103",
-    type: "Burns",
-    hospital: "Metro Trauma Institute",
-    time: "4:48 PM",
-    status: "In Progress",
-  },
-  {
-    caseId: "EMG104",
-    type: "Orthopedic",
-    hospital: "St. Mary's Hospital",
-    time: "6:20 PM",
-    status: "Completed",
-  },
-  {
-    caseId: "EMG105",
-    type: "Pediatric",
-    hospital: "Fortis Emergency Wing",
-    time: "8:05 PM",
-    status: "Pending",
-  },
-  {
-    caseId: "EMG106",
-    type: "Neurology",
-    hospital: "Govt. District Hospital",
-    time: "9:42 PM",
-    status: "In Progress",
-  },
-  {
-    caseId: "EMG107",
-    type: "Respiratory",
-    hospital: "City General Hospital",
-    time: "11:10 PM",
-    status: "Completed",
-  },
-  {
-    caseId: "EMG108",
-    type: "Trauma",
-    hospital: "Apollo Medical Center",
-    time: "1:30 AM",
-    status: "Completed",
-  },
-];
+// Mock cases removed. Data is fetched dynamically.
 
 const statusConfig: Record<string, { icon: typeof CheckCircle; className: string }> = {
   Completed: { icon: CheckCircle, className: "bg-success/10 text-success border-success/30" },
@@ -85,11 +28,15 @@ const statusConfig: Record<string, { icon: typeof CheckCircle; className: string
 };
 
 const UserActivityTable = () => {
-  const [cases, setCases] = useState<CaseRecord[]>(MOCK_CASES);
+  const [cases, setCases] = useState<CaseRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
 
     fetch("http://localhost:5000/api/visits", {
       headers: { Authorization: `Bearer ${token}` },
@@ -99,11 +46,12 @@ const UserActivityTable = () => {
         throw new Error("Failed to fetch");
       })
       .then((data) => {
-        if (data.cases && data.cases.length > 0) {
+        if (data.cases) {
           setCases(data.cases);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
   return (
@@ -146,10 +94,26 @@ const UserActivityTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {cases.map((record) => {
-            const statusInfo = statusConfig[record.status] || statusConfig.Pending;
-            const StatusIcon = statusInfo.icon;
-            return (
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-6">
+                <div className="flex flex-col items-center justify-center text-muted-foreground text-sm">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
+                  Loading dispatch records...
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : cases.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-6 text-muted-foreground text-sm">
+                No active records found.
+              </TableCell>
+            </TableRow>
+          ) : (
+            cases.map((record) => {
+              const statusInfo = statusConfig[record.status] || statusConfig.Pending;
+              const StatusIcon = statusInfo.icon;
+              return (
               <TableRow key={record.caseId} className="border-border">
                 <TableCell>
                   <span className="text-sm font-bold font-mono text-secondary">{record.caseId}</span>
@@ -179,7 +143,8 @@ const UserActivityTable = () => {
                 </TableCell>
               </TableRow>
             );
-          })}
+            })
+          )}
         </TableBody>
       </Table>
     </motion.div>

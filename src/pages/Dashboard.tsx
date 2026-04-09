@@ -16,7 +16,8 @@ import {
   Shield,
   Pill,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useHospitals } from "@/hooks/useHospitals";
 import {
   BarChart,
   Bar,
@@ -37,55 +38,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import UserActivityTable from "@/components/UserActivityTable";
-import { hospitalData } from "@/data/hospitals";
-
-/* ─── derived stats ─── */
-const totalHospitals = hospitalData.length;
-const totalDoctors = hospitalData.reduce((s, h) => s + h.doctors, 0);
-const totalICU = hospitalData.reduce((s, h) => s + h.icuBeds, 0);
-const totalGeneral = hospitalData.reduce((s, h) => s + h.generalBeds, 0);
-const avgRating = (
-  hospitalData.reduce((s, h) => s + h.rating, 0) / totalHospitals
-).toFixed(1);
-const activeEmergencies = 3;
-
-/* ─── chart data ─── */
-const bedData = hospitalData.map((h) => ({
-  name: h.name.replace(/(Hospital|Medical|Institute|Wing)/gi, "").trim(),
-  ICU: h.icuBeds,
-  General: h.generalBeds,
-}));
-
-const typeDistribution = [
-  {
-    name: "Government",
-    value: hospitalData.filter((h) => h.type === "government").length,
-  },
-  {
-    name: "Private",
-    value: hospitalData.filter((h) => h.type === "private").length,
-  },
-];
-
-const statusDistribution = [
-  {
-    name: "Available",
-    value: hospitalData.filter((h) => h.status === "available").length,
-  },
-  {
-    name: "Busy",
-    value: hospitalData.filter((h) => h.status === "busy").length,
-  },
-  {
-    name: "Critical",
-    value: hospitalData.filter((h) => h.status === "critical").length,
-  },
-];
-
-const doctorsPerHospital = hospitalData.map((h) => ({
-  name: h.name.replace(/(Hospital|Medical|Institute|Wing)/gi, "").trim(),
-  doctors: h.doctors,
-}));
+// Dynamic stats will be derived inside the component
 
 const monthlyVisits = [
   { month: "Jan", visits: 320 },
@@ -128,51 +81,7 @@ const COLORS = {
 const PIE_TYPE_COLORS = [COLORS.secondary, COLORS.primary];
 const PIE_STATUS_COLORS = [COLORS.success, COLORS.accent, COLORS.primary];
 
-/* ─── stat card config ─── */
-const stats = [
-  {
-    label: "Total Hospitals",
-    value: totalHospitals,
-    icon: Hospital,
-    color: "text-primary",
-    bg: "bg-primary/10",
-  },
-  {
-    label: "Total Doctors",
-    value: totalDoctors,
-    icon: Users,
-    color: "text-secondary",
-    bg: "bg-secondary/10",
-  },
-  {
-    label: "ICU Beds",
-    value: totalICU,
-    icon: Bed,
-    color: "text-[#eab308]",
-    bg: "bg-[#eab308]/10",
-  },
-  {
-    label: "General Beds",
-    value: totalGeneral,
-    icon: Bed,
-    color: "text-success",
-    bg: "bg-success/10",
-  },
-  {
-    label: "Avg Rating",
-    value: avgRating,
-    icon: Star,
-    color: "text-[#eab308]",
-    bg: "bg-[#eab308]/10",
-  },
-  {
-    label: "Active Emergencies",
-    value: activeEmergencies,
-    icon: AlertTriangle,
-    color: "text-primary",
-    bg: "bg-primary/10",
-  },
-];
+// Stats config derived inside components
 
 /* ─── tabs ─── */
 type TabKey = "overview" | "trends" | "performance";
@@ -243,6 +152,63 @@ const API_BASE = "http://localhost:5000";
    Dashboard component
    ═══════════════════════════════════════════ */
 const Dashboard = () => {
+  const { data: hospitalData = [], isLoading: isHospitalsLoading } = useHospitals();
+
+  const {
+    totalHospitals,
+    totalDoctors,
+    totalICU,
+    totalGeneral,
+    avgRating,
+    activeEmergencies,
+    bedData,
+    typeDistribution,
+    statusDistribution,
+    doctorsPerHospital,
+    stats,
+  } = useMemo(() => {
+    const totalHospitals = hospitalData.length;
+    const totalDoctors = hospitalData.reduce((s: any, h: any) => s + h.doctors, 0);
+    const totalICU = hospitalData.reduce((s: any, h: any) => s + h.icuBeds, 0);
+    const totalGeneral = hospitalData.reduce((s: any, h: any) => s + h.generalBeds, 0);
+    const avgRating = totalHospitals 
+      ? (hospitalData.reduce((s: any, h: any) => s + (h.rating || 0), 0) / totalHospitals).toFixed(1) 
+      : "0.0";
+    const activeEmergencies = 3;
+
+    const stats = [
+      { label: "Total Hospitals", value: totalHospitals, icon: Hospital, color: "text-primary", bg: "bg-primary/10" },
+      { label: "Total Doctors", value: totalDoctors, icon: Users, color: "text-secondary", bg: "bg-secondary/10" },
+      { label: "ICU Beds", value: totalICU, icon: Bed, color: "text-[#eab308]", bg: "bg-[#eab308]/10" },
+      { label: "General Beds", value: totalGeneral, icon: Bed, color: "text-success", bg: "bg-success/10" },
+      { label: "Avg Rating", value: avgRating, icon: Star, color: "text-[#eab308]", bg: "bg-[#eab308]/10" },
+      { label: "Active Emergencies", value: activeEmergencies, icon: AlertTriangle, color: "text-primary", bg: "bg-primary/10" },
+    ];
+
+    const bedData = hospitalData.map((h: any) => ({
+      name: h.name.replace(/(Hospital|Medical|Institute|Wing)/gi, "").trim(),
+      ICU: h.icuBeds,
+      General: h.generalBeds,
+    }));
+
+    const typeDistribution = [
+      { name: "Government", value: hospitalData.filter((h: any) => h.type === "government").length },
+      { name: "Private", value: hospitalData.filter((h: any) => h.type === "private").length },
+    ];
+
+    const statusDistribution = [
+      { name: "Available", value: hospitalData.filter((h: any) => h.status === "available").length },
+      { name: "Busy", value: hospitalData.filter((h: any) => h.status === "busy").length },
+      { name: "Critical", value: hospitalData.filter((h: any) => h.status === "critical").length },
+    ];
+
+    const doctorsPerHospital = hospitalData.map((h: any) => ({
+      name: h.name.replace(/(Hospital|Medical|Institute|Wing)/gi, "").trim(),
+      doctors: h.doctors,
+    }));
+
+    return { totalHospitals, totalDoctors, totalICU, totalGeneral, avgRating, activeEmergencies, bedData, typeDistribution, statusDistribution, doctorsPerHospital, stats };
+  }, [hospitalData]);
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [userProfile, setUserProfile] = useState<ProfileData | null>(null);
   const [userName, setUserName] = useState<string | null>(null);

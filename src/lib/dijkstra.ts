@@ -1,5 +1,8 @@
-import { hospitalData, AMBULANCE_POSITION } from "@/data/hospitals";
+import { AMBULANCE_POSITION } from "@/data/hospitals";
 import type { Hospital } from "@/data/hospitals";
+
+// Fallback dummy data since actual hospitals are fetched dynamically via useHospitals
+const hospitalData: Hospital[] = [];
 
 export interface GraphNode {
   id: string;
