@@ -74,7 +74,25 @@ const createHospital = async (req, res) => {
   }
 };
 
+// @desc    Get aggregated stats
+// @route   GET /api/hospitals/stats
+// @access  Public
+const getStats = async (req, res) => {
+  try {
+    const hospitals = await Hospital.find({});
+    const totalICU = hospitals.reduce((s, h) => s + (h.icuBeds || 0), 0);
+    const totalGeneral = hospitals.reduce((s, h) => s + (h.generalBeds || 0), 0);
+    const totalDoctors = hospitals.reduce((s, h) => s + (h.doctors || 0), 0);
+    const totalHospitals = hospitals.length;
+    res.json({ totalICU, totalGeneral, totalDoctors, totalHospitals });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error fetching stats" });
+  }
+};
+
 module.exports = {
   getHospitals,
   createHospital,
+  getStats,
 };

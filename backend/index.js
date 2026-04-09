@@ -1,13 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const { connectToMongoDB } = require("./connect");
+const { PORT, MONGODB_URI } = require("./config");
 const authRoutes = require("./routes/authRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const hospitalRoutes = require("./routes/hospitalRoutes");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
   res.json({ message: "MediRoute API is running" });
 });
 
-connectToMongoDB("mongodb://127.0.0.1:27017/Smart-tracker")
+connectToMongoDB(MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {

@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Hospital } from "../data/hospitals";
+import { API_BASE } from "@/config";
 
-const API_URL = "http://localhost:5000/api/hospitals";
+const API_URL = `${API_BASE}/api/hospitals`;
 
 // Fetch all hospitals
 export const useHospitals = () => {

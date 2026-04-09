@@ -1,13 +1,6 @@
 import { motion } from "framer-motion";
-
-const hospitals = [
-  { x: 30, y: 25, name: "City General", status: "available" },
-  { x: 65, y: 35, name: "Metro ICU", status: "busy" },
-  { x: 45, y: 60, name: "St. Mary's", status: "available" },
-  { x: 75, y: 70, name: "Govt. Hospital", status: "critical" },
-  { x: 20, y: 55, name: "Apollo Care", status: "available" },
-  { x: 55, y: 15, name: "Trauma Center", status: "busy" },
-];
+import { useHospitals } from "@/hooks/useHospitals";
+import { useMemo } from "react";
 
 const statusColor: Record<string, string> = {
   available: "bg-success",
@@ -15,38 +8,54 @@ const statusColor: Record<string, string> = {
   critical: "bg-primary",
 };
 
-const statusGlow: Record<string, string> = {
-  available: "shadow-[0_0_12px_hsl(145_65%_42%/0.6)]",
-  busy: "shadow-[0_0_12px_hsl(45_95%_55%/0.6)]",
-  critical: "shadow-[0_0_12px_hsl(0_85%_55%/0.6)]",
-};
-
 const PulseMap = () => {
-  return (
-    <div className="relative aspect-square w-full max-w-lg mx-auto rounded-2xl border border-border bg-card/50 overflow-hidden">
-      {/* Grid */}
-      <div className="absolute inset-0 grid-bg opacity-60" />
+  const { data: hospitalData = [] } = useHospitals();
 
-      {/* Ambulance position */}
+  const mappedHospitals = useMemo(() => {
+    if (hospitalData.length === 0) return [];
+
+    // Calculate bounding box to normalize positions to 10-90% range
+    const lats = hospitalData.map(h => h.lat);
+    const lngs = hospitalData.map(h => h.lng);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+
+    const latRange = maxLat - minLat || 0.1;
+    const lngRange = maxLng - minLng || 0.1;
+
+    return hospitalData.map(h => ({
+      name: h.name,
+      status: h.status,
+      // Normalize to 15-85% to keep away from edges
+      x: 15 + ((h.lng - minLng) / lngRange) * 70,
+      y: 15 + (1 - (h.lat - minLat) / latRange) * 70, // Invert Y for map coordinates
+    }));
+  }, [hospitalData]);
+
+  return (
+    <div className="relative aspect-square w-full max-w-lg mx-auto rounded-2xl border border-border bg-card/10 overflow-hidden">
+      {/* Ambulance position - center point */}
       <motion.div
         className="absolute z-20"
-        style={{ left: "48%", top: "45%" }}
+        style={{ left: "50%", top: "50%" }}
         animate={{ scale: [1, 1.2, 1] }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        <div className="relative">
+        <div className="relative -translate-x-1/2 -translate-y-1/2">
           <div className="h-4 w-4 rounded-full bg-primary" />
           <div className="absolute inset-0 h-4 w-4 rounded-full bg-primary animate-ping opacity-40" />
         </div>
       </motion.div>
 
-      {/* Connection lines from ambulance to hospitals */}
+      {/* Connection lines from center to hospitals */}
       <svg className="absolute inset-0 w-full h-full z-10 pointer-events-none">
-        {hospitals.map((h, i) => (
+        {mappedHospitals.map((h, i) => (
           <motion.line
             key={i}
             x1="50%"
-            y1="47%"
+            y1="50%"
             x2={`${h.x}%`}
             y2={`${h.y}%`}
             stroke={h.status === "available" ? "hsl(185 80% 45%)" : "hsl(220 15% 25%)"}
@@ -55,23 +64,23 @@ const PulseMap = () => {
             opacity={h.status === "available" ? 0.5 : 0.2}
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1, strokeDashoffset: [-20, 0] }}
-            transition={{ duration: 2, delay: i * 0.2, repeat: Infinity, repeatType: "loop" }}
+            transition={{ duration: 2, delay: i * 0.1, repeat: Infinity, repeatType: "loop" }}
           />
         ))}
       </svg>
 
       {/* Hospital nodes */}
-      {hospitals.map((h, i) => (
+      {mappedHospitals.map((h, i) => (
         <motion.div
           key={h.name}
           className="absolute z-20 group"
           style={{ left: `${h.x}%`, top: `${h.y}%` }}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.5 + i * 0.1, type: "spring" }}
+          transition={{ delay: 0.2 + i * 0.05, type: "spring" }}
         >
-          <div className={`h-3 w-3 rounded-full ${statusColor[h.status]} ${statusGlow[h.status]} -translate-x-1/2 -translate-y-1/2`} />
-          <div className="absolute left-1/2 -translate-x-1/2 top-3 bg-card/90 border border-border rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          <div className={`h-3 w-3 rounded-full ${statusColor[h.status]} -translate-x-1/2 -translate-y-1/2 border border-black/20`} />
+          <div className="absolute left-1/2 -translate-x-1/2 top-3 bg-card/90 border border-border rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 shadow-xl">
             <p className="text-[10px] font-mono text-foreground">{h.name}</p>
             <p className="text-[9px] font-mono text-muted-foreground capitalize">{h.status}</p>
           </div>
@@ -94,7 +103,7 @@ const PulseMap = () => {
 
       {/* Label */}
       <div className="absolute top-3 left-3 z-20">
-        <span className="text-[10px] font-mono text-secondary tracking-wider">LIVE MAP VIEW</span>
+        <span className="text-[10px] font-mono text-secondary tracking-wider">LIVE NETWORK VIEW</span>
       </div>
     </div>
   );

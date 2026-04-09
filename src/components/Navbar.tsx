@@ -29,56 +29,7 @@ interface Notification {
   read: boolean;
 }
 
-const initialNotifications: Notification[] = [
-  {
-    id: 1,
-    type: "ambulance",
-    title: "AMB-1042 Dispatched",
-    message: "Emergency unit en route to City General Hospital. ETA 8 min.",
-    time: "2 min ago",
-    read: false,
-  },
-  {
-    id: 2,
-    type: "ambulance",
-    title: "AMB-0817 Available",
-    message: "Unit returned to station. GPS tracking active, ready for next dispatch.",
-    time: "15 min ago",
-    read: false,
-  },
-  {
-    id: 3,
-    type: "feature",
-    title: "Real-Time Route Optimization",
-    message: "New AI-powered Dijkstra routing now live — finds fastest emergency paths.",
-    time: "1 hr ago",
-    read: false,
-  },
-  {
-    id: 4,
-    type: "ambulance",
-    title: "AMB-0523 En Route",
-    message: "Transporting patient to St. Mary's Trauma Center. Siren active.",
-    time: "1 hr ago",
-    read: true,
-  },
-  {
-    id: 5,
-    type: "feature",
-    title: "Live Bed Availability",
-    message: "Hospital dashboard now shows real-time ICU & ER bed counts.",
-    time: "3 hr ago",
-    read: true,
-  },
-  {
-    id: 6,
-    type: "alert",
-    title: "AMB-0399 Maintenance Alert",
-    message: "Scheduled maintenance complete. Vehicle cleared for emergency duty.",
-    time: "5 hr ago",
-    read: true,
-  },
-];
+const initialNotifications: Notification[] = [];
 
 const Navbar = () => {
   const [time, setTime] = useState(new Date());
@@ -154,9 +105,9 @@ const Navbar = () => {
     >
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 glow-red">
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <Activity className="h-5 w-5 text-primary" />
-            <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary animate-pulse-slow" />
+            <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-wide text-foreground">
@@ -176,7 +127,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="hidden sm:block font-mono text-xs text-secondary glow-text-cyan">
+          <span className="hidden sm:block font-mono text-xs text-secondary">
             {time.toLocaleTimeString("en-US", { hour12: false })}
           </span>
           <Popover>
@@ -253,6 +204,7 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={() => navigate("/dashboard")}
                   className="w-full text-xs text-muted-foreground hover:text-foreground"
                 >
                   View all notifications

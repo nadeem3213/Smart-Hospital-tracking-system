@@ -1,3 +1,5 @@
+import { DEFAULT_POSITION } from "@/config";
+
 export interface Hospital {
   name: string;
   type: "government" | "private";
@@ -18,4 +20,4 @@ export interface Hospital {
   specialties: string[];
 }
 
-export const AMBULANCE_POSITION: [number, number] = [18.5204, 73.8567];
+export const AMBULANCE_POSITION: [number, number] = DEFAULT_POSITION;

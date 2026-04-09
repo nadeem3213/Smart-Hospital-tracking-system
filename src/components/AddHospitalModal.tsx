@@ -167,7 +167,7 @@ const AddHospitalModal = () => {
               </div>
             </div>
             
-            <Button type="submit" disabled={addHospitalMutation.isPending} className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90 glow-red">
+            <Button type="submit" disabled={addHospitalMutation.isPending} className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
               {addHospitalMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MapPin className="h-4 w-4 mr-2" />}
               {addHospitalMutation.isPending ? "Adding Database Record..." : "Confirm & Add"}
             </Button>

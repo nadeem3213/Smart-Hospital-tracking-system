@@ -1,8 +1,5 @@
-import { AMBULANCE_POSITION } from "@/data/hospitals";
+import { DEFAULT_POSITION } from "@/config";
 import type { Hospital } from "@/data/hospitals";
-
-// Fallback dummy data since actual hospitals are fetched dynamically via useHospitals
-const hospitalData: Hospital[] = [];
 
 export interface GraphNode {
   id: string;
@@ -83,73 +80,89 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
-const BASE_WAYPOINTS: GraphNode[] = [
-  ...hospitalData.map((h) => ({ id: h.name, lat: h.lat, lng: h.lng, label: h.name })),
-  { id: "jn1", lat: 18.5250, lng: 73.8520, label: "Junction 1" },
-  { id: "jn2", lat: 18.5280, lng: 73.8400, label: "Junction 2" },
-  { id: "jn3", lat: 18.5150, lng: 73.8300, label: "Junction 3" },
-  { id: "jn4", lat: 18.5100, lng: 73.8500, label: "Junction 4" },
-  { id: "jn5", lat: 18.5400, lng: 73.8550, label: "Junction 5" },
-  { id: "jn6", lat: 18.5350, lng: 73.8700, label: "Junction 6" },
-  { id: "jn7", lat: 18.5500, lng: 73.8200, label: "Junction 7" },
-  { id: "jn8", lat: 18.5450, lng: 73.8900, label: "Junction 8" },
-  { id: "jn9", lat: 18.4950, lng: 73.8550, label: "Junction 9" },
-  { id: "jn10", lat: 18.5550, lng: 73.8600, label: "Junction 10" },
-  { id: "jn11", lat: 18.5200, lng: 73.8150, label: "Junction 11" },
-  { id: "jn12", lat: 18.5600, lng: 73.8450, label: "Junction 12" },
-];
-
-const BASE_CONNECTIONS: [string, string][] = [
-  ["jn1", "jn2"],
-  ["jn1", "jn5"],
-  ["jn1", "jn6"],
-  ["jn2", "jn3"],
-  ["jn2", "City General Hospital"],
-  ["jn2", "jn7"],
-  ["jn3", "jn11"],
-  ["jn3", "Fortis Emergency Wing"],
-  ["jn4", "jn9"],
-  ["jn4", "Fortis Emergency Wing"],
-  ["jn4", "jn3"],
-  ["jn5", "City General Hospital"],
-  ["jn5", "jn6"],
-  ["jn5", "jn12"],
-  ["jn6", "jn8"],
-  ["jn6", "jn10"],
-  ["jn7", "Metro Trauma Institute"],
-  ["jn7", "jn12"],
-  ["jn8", "Govt. District Hospital"],
-  ["jn8", "jn10"],
-  ["jn9", "St. Mary's Hospital"],
-  ["jn9", "jn4"],
-  ["jn10", "Govt. District Hospital"],
-  ["jn10", "jn12"],
-  ["jn11", "Apollo Medical Center"],
-  ["jn11", "jn7"],
-  ["jn12", "Metro Trauma Institute"],
-  ["jn12", "jn10"],
-];
-
-function getWaypoints(userPosition: [number, number]): GraphNode[] {
-  return [
+function getDynamicWaypoints(
+  userPosition: [number, number],
+  hospitals: Hospital[]
+): GraphNode[] {
+  const waypoints: GraphNode[] = [
     { id: "user", lat: userPosition[0], lng: userPosition[1], label: "Your Location" },
-    ...BASE_WAYPOINTS,
   ];
+  
+  // Add hospitals as nodes
+  hospitals.forEach((h) => {
+    waypoints.push({ id: h.name, lat: h.lat, lng: h.lng, label: h.name });
+  });
+
+  // Generate some intermediate dynamic junctions to create a real-looking graph
+  hospitals.forEach((h, i) => {
+    const jLat = (userPosition[0] + h.lat) / 2 + (Math.random() - 0.5) * 0.02;
+    const jLng = (userPosition[1] + h.lng) / 2 + (Math.random() - 0.5) * 0.02;
+    waypoints.push({ id: `dyn_jn_${i}`, lat: jLat, lng: jLng, label: `Junction ${i + 1}` });
+  });
+
+  return waypoints;
 }
 
-function getNearestJunctions(userLat: number, userLng: number, count: number): string[] {
-  const junctions = BASE_WAYPOINTS.filter((w) => w.id.startsWith("jn"));
-  const sorted = junctions
-    .map((j) => ({ id: j.id, dist: haversineDistance(userLat, userLng, j.lat, j.lng) }))
-    .sort((a, b) => a.dist - b.dist);
-  return sorted.slice(0, count).map((j) => j.id);
+function getDynamicConnections(waypoints: GraphNode[]): [string, string][] {
+  const connections: [string, string][] = [];
+  const junctions = waypoints.filter(w => w.id.startsWith("dyn_jn_"));
+  const user = waypoints.find(w => w.id === "user");
+  const hospitals = waypoints.filter(w => !w.id.startsWith("dyn_jn_") && w.id !== "user");
+
+  if (!user) return [];
+
+  // Connect user to nearby junctions
+  junctions.forEach((j) => {
+    if (haversineDistance(user.lat, user.lng, j.lat, j.lng) < 8) {
+      connections.push(["user", j.id]);
+    }
+  });
+
+  // Connect junctions to each other (if close enough)
+  for (let i = 0; i < junctions.length; i++) {
+    for (let k = i + 1; k < junctions.length; k++) {
+      if (haversineDistance(junctions[i].lat, junctions[i].lng, junctions[k].lat, junctions[k].lng) < 5) {
+         connections.push([junctions[i].id, junctions[k].id]);
+      }
+    }
+  }
+
+  // Connect junctions to hospitals
+  junctions.forEach(j => {
+    hospitals.forEach(h => {
+       if (haversineDistance(j.lat, j.lng, h.lat, h.lng) < 5) {
+         connections.push([j.id, h.id]);
+       }
+    });
+  });
+  
+  // Fallback: make sure every hospital is reachable from somewhere
+  hospitals.forEach(h => {
+    const hasConnection = connections.some(c => c[0] === h.id || c[1] === h.id);
+    if (!hasConnection && junctions.length > 0) {
+      // Connect to closest junction
+       let closestJ = junctions[0];
+       let minDist = haversineDistance(h.lat, h.lng, junctions[0].lat, junctions[0].lng);
+       for(let i=1; i<junctions.length; i++){
+          const dist = haversineDistance(h.lat, h.lng, junctions[i].lat, junctions[i].lng);
+          if(dist < minDist){
+             minDist = dist;
+             closestJ = junctions[i];
+          }
+       }
+       connections.push([closestJ.id, h.id]);
+    }
+  });
+
+  return connections;
 }
 
 function buildGraph(
   userPosition: [number, number],
+  hospitals: Hospital[],
   edgePenalties?: Map<string, number>
 ): Map<string, Map<string, number>> {
-  const waypoints = getWaypoints(userPosition);
+  const waypoints = getDynamicWaypoints(userPosition, hospitals);
   const nodeMap = new Map<string, GraphNode>();
   for (const node of waypoints) {
     nodeMap.set(node.id, node);
@@ -160,9 +173,7 @@ function buildGraph(
     graph.set(node.id, new Map());
   }
 
-  const nearestJunctions = getNearestJunctions(userPosition[0], userPosition[1], 4);
-  const userConnections: [string, string][] = nearestJunctions.map((jn) => ["user", jn]);
-  const allConnections = [...BASE_CONNECTIONS, ...userConnections];
+  const allConnections = getDynamicConnections(waypoints);
 
   for (const [fromId, toId] of allConnections) {
     const from = nodeMap.get(fromId);
@@ -312,12 +323,13 @@ function buildRouteResult(
 export function dijkstra(
   sourceId: string,
   targetId: string,
+  hospitals: Hospital[],
   userPosition?: [number, number]
 ): RouteResult | null {
-  const pos = userPosition ?? AMBULANCE_POSITION;
+  const pos = userPosition ?? DEFAULT_POSITION;
   const effectiveSource = sourceId === "amb" ? "user" : sourceId;
-  const graph = buildGraph(pos);
-  const waypoints = getWaypoints(pos);
+  const graph = buildGraph(pos, hospitals);
+  const waypoints = getDynamicWaypoints(pos, hospitals);
 
   const result = runDijkstra(graph, effectiveSource, targetId);
   if (!result) return null;
@@ -328,10 +340,11 @@ export function dijkstra(
 
 export function findMultipleRoutes(
   targetId: string,
+  hospitals: Hospital[],
   userPosition?: [number, number],
   count: number = 3
 ): RouteResult[] {
-  const pos = userPosition ?? AMBULANCE_POSITION;
+  const pos = userPosition ?? DEFAULT_POSITION;
   const routes: RouteResult[] = [];
   const seenPaths = new Set<string>();
   const cumulativePenalties = new Map<string, number>();
@@ -339,8 +352,8 @@ export function findMultipleRoutes(
   const labels = ["Fastest Route", "Alternative Route", "Scenic Route"];
 
   for (let i = 0; i < count; i++) {
-    const graph = buildGraph(pos, i === 0 ? undefined : cumulativePenalties);
-    const waypoints = getWaypoints(pos);
+    const graph = buildGraph(pos, hospitals, i === 0 ? undefined : cumulativePenalties);
+    const waypoints = getDynamicWaypoints(pos, hospitals);
     const result = runDijkstra(graph, "user", targetId);
     if (!result) continue;
 
@@ -350,7 +363,7 @@ export function findMultipleRoutes(
 
     const displayNodes = result.nodeIds.map((id) => (id === "user" ? "amb" : id));
 
-    const unpenaledGraph = buildGraph(pos);
+    const unpenaledGraph = buildGraph(pos, hospitals);
     let realDistance = 0;
     for (let j = 0; j < result.nodeIds.length - 1; j++) {
       const neighbors = unpenaledGraph.get(result.nodeIds[j]);
@@ -381,16 +394,17 @@ export function findMultipleRoutes(
 }
 
 export function findBestHospital(
+  hospitals: Hospital[],
   userPosition?: [number, number]
 ): { hospital: Hospital; route: RouteResult } | null {
   let bestRoute: RouteResult | null = null;
   let bestHospital: Hospital | null = null;
   let bestScore = Infinity;
 
-  for (const hospital of hospitalData) {
+  for (const hospital of hospitals) {
     if (hospital.status === "critical" && hospital.icuBeds === 0) continue;
 
-    const route = dijkstra("amb", hospital.name, userPosition);
+    const route = dijkstra("amb", hospital.name, hospitals, userPosition);
     if (!route) continue;
 
     const statusPenalty = hospital.status === "critical" ? 5 : hospital.status === "busy" ? 2 : 0;
@@ -408,4 +422,4 @@ export function findBestHospital(
   return { hospital: bestHospital, route: bestRoute };
 }
 
-export { haversineDistance, TRAFFIC_COLORS, AMBULANCE_POSITION };
+export { haversineDistance, TRAFFIC_COLORS };

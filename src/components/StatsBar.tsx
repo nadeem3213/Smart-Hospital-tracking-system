@@ -1,14 +1,30 @@
 import { motion } from "framer-motion";
-import { Bed, UserCheck, Ambulance, Clock } from "lucide-react";
-
-const stats = [
-  { icon: Bed, label: "ICU Beds Available", value: 42, total: 180, color: "text-secondary" },
-  { icon: UserCheck, label: "Doctors On-Call", value: 89, total: 120, color: "text-success" },
-  { icon: Ambulance, label: "Active Ambulances", value: 23, total: 35, color: "text-primary" },
-  { icon: Clock, label: "Avg Route Time", value: "4.2", unit: "min", color: "text-warning" },
-];
+import { Bed, UserCheck, Hospital, PlusSquare } from "lucide-react";
+import { useHospitals } from "@/hooks/useHospitals";
+import { useMemo } from "react";
 
 const StatsBar = () => {
+  const { data: hospitalData = [] } = useHospitals();
+
+  const stats = useMemo(() => {
+    let icuBeds = 0;
+    let generalBeds = 0;
+    let doctors = 0;
+
+    hospitalData.forEach(h => {
+      icuBeds += (h.icuBeds || 0);
+      generalBeds += (h.generalBeds || 0);
+      doctors += (h.doctors || 0);
+    });
+
+    return [
+      { icon: Bed, label: "Total ICU Beds", value: icuBeds, color: "text-secondary" },
+      { icon: PlusSquare, label: "Total General Beds", value: generalBeds, color: "text-primary" },
+      { icon: UserCheck, label: "Total Doctors", value: doctors, color: "text-success" },
+      { icon: Hospital, label: "Network Hospitals", value: hospitalData.length, color: "text-warning" },
+    ];
+  }, [hospitalData]);
+
   return (
     <section className="relative border-y border-border bg-card/30">
       <div className="container py-8">
@@ -28,8 +44,6 @@ const StatsBar = () => {
               <div>
                 <p className="text-2xl font-bold font-mono text-foreground">
                   {stat.value}
-                  {stat.unit && <span className="text-sm text-muted-foreground ml-1">{stat.unit}</span>}
-                  {stat.total && <span className="text-sm text-muted-foreground">/{stat.total}</span>}
                 </p>
                 <p className="text-xs text-muted-foreground">{stat.label}</p>
               </div>
@@ -42,3 +56,4 @@ const StatsBar = () => {
 };
 
 export default StatsBar;
+

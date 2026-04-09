@@ -17,7 +17,9 @@ import {
   Pill,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useHospitals } from "@/hooks/useHospitals";
+import { API_BASE } from "@/config";
 import {
   BarChart,
   Bar,
@@ -40,36 +42,6 @@ import Footer from "@/components/Footer";
 import UserActivityTable from "@/components/UserActivityTable";
 // Dynamic stats will be derived inside the component
 
-const monthlyVisits = [
-  { month: "Jan", visits: 320 },
-  { month: "Feb", visits: 290 },
-  { month: "Mar", visits: 410 },
-  { month: "Apr", visits: 380 },
-  { month: "May", visits: 450 },
-  { month: "Jun", visits: 520 },
-  { month: "Jul", visits: 490 },
-  { month: "Aug", visits: 560 },
-  { month: "Sep", visits: 530 },
-  { month: "Oct", visits: 610 },
-  { month: "Nov", visits: 580 },
-  { month: "Dec", visits: 640 },
-];
-
-const emergencyResponse = [
-  { month: "Jan", time: 8.2 },
-  { month: "Feb", time: 7.8 },
-  { month: "Mar", time: 7.1 },
-  { month: "Apr", time: 6.9 },
-  { month: "May", time: 6.5 },
-  { month: "Jun", time: 6.2 },
-  { month: "Jul", time: 5.8 },
-  { month: "Aug", time: 5.5 },
-  { month: "Sep", time: 5.3 },
-  { month: "Oct", time: 5.0 },
-  { month: "Nov", time: 4.8 },
-  { month: "Dec", time: 4.5 },
-];
-
 /* ─── palette ─── */
 const COLORS = {
   primary: "#ef4444",
@@ -87,7 +59,6 @@ const PIE_STATUS_COLORS = [COLORS.success, COLORS.accent, COLORS.primary];
 type TabKey = "overview" | "trends" | "performance";
 const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: "overview", label: "Overview", icon: BarChart3 },
-  { key: "trends", label: "Trends", icon: TrendingUp },
   { key: "performance", label: "Performance", icon: PieChartIcon },
 ];
 
@@ -146,12 +117,13 @@ interface ProfileData {
   address: string;
 }
 
-const API_BASE = "http://localhost:5000";
+// API_BASE imported from @/config
 
 /* ═══════════════════════════════════════════
    Dashboard component
    ═══════════════════════════════════════════ */
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { data: hospitalData = [], isLoading: isHospitalsLoading } = useHospitals();
 
   const {
@@ -174,7 +146,7 @@ const Dashboard = () => {
     const avgRating = totalHospitals 
       ? (hospitalData.reduce((s: any, h: any) => s + (h.rating || 0), 0) / totalHospitals).toFixed(1) 
       : "0.0";
-    const activeEmergencies = 3;
+    const activeEmergencies = hospitalData.filter((h: any) => h.status === "critical").length;
 
     const stats = [
       { label: "Total Hospitals", value: totalHospitals, icon: Hospital, color: "text-primary", bg: "bg-primary/10" },
@@ -351,7 +323,7 @@ const Dashboard = () => {
                   <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">
-                      Complete your <a href="/profile" className="text-primary hover:underline font-medium">medical profile</a> to see your details here.
+                      Complete your <Link to="/profile" className="text-primary hover:underline font-medium">medical profile</Link> to see your details here.
                     </p>
                   </div>
                 )}
@@ -377,7 +349,13 @@ const Dashboard = () => {
               initial="hidden"
               animate="visible"
               whileHover={{ y: -2, transition: { duration: 0.2 } }}
-              className="rounded-xl border border-border bg-card/60 backdrop-blur-sm p-4 flex flex-col gap-3 transition-colors hover:border-primary/20"
+              onClick={() => {
+                if (s.label === "Total Hospitals") navigate("/hospitals");
+                if (s.label === "Active Emergencies") navigate("/routing");
+              }}
+              className={`rounded-xl border border-border bg-card/60 backdrop-blur-sm p-4 flex flex-col gap-3 transition-colors hover:border-primary/20 ${
+                (s.label === "Total Hospitals" || s.label === "Active Emergencies") ? "cursor-pointer hover:bg-muted/30" : ""
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${s.bg}`}>
@@ -539,80 +517,7 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {activeTab === "trends" && (
-          <motion.div
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10"
-          >
-            {/* Line – Monthly patient visits */}
-            <ChartCard title="Monthly Patient Visits" subtitle="12-month patient volume trend">
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyVisits}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={false}
-                  />
-                  <Tooltip {...tooltipStyle} />
-                  <Line
-                    type="monotone"
-                    dataKey="visits"
-                    stroke={COLORS.secondary}
-                    strokeWidth={2.5}
-                    dot={{ fill: COLORS.secondary, r: 4 }}
-                    activeDot={{ r: 6, stroke: COLORS.secondary, strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartCard>
 
-            {/* Area – Emergency response time */}
-            <ChartCard title="Emergency Response Time" subtitle="Average response time trend (minutes)">
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={emergencyResponse}>
-                  <defs>
-                    <linearGradient id="responseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={false}
-                    domain={[0, 10]}
-                  />
-                  <Tooltip {...tooltipStyle} />
-                  <Area
-                    type="monotone"
-                    dataKey="time"
-                    stroke={COLORS.primary}
-                    strokeWidth={2.5}
-                    fill="url(#responseGrad)"
-                    dot={{ fill: COLORS.primary, r: 4 }}
-                    activeDot={{ r: 6, stroke: COLORS.primary, strokeWidth: 2 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartCard>
-          </motion.div>
-        )}
 
         {activeTab === "performance" && (
           <motion.div

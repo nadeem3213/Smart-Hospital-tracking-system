@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from "react-leaflet";
 import L from "leaflet";
@@ -70,9 +71,9 @@ function getEtaForMode(distKm: number, mode: TravelMode, drivingDurationMin?: nu
 const ROUTE_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b"];
 
 const MODE_LINE_STYLES: Record<TravelMode, { weight: number; glowWeight: number; dashArray?: string; dimWeight: number; dimDash: string }> = {
-  car: { weight: 6, glowWeight: 16, dimWeight: 4, dimDash: "6, 8" },
-  bike: { weight: 4, glowWeight: 10, dashArray: "10, 6", dimWeight: 3, dimDash: "6, 8" },
-  walk: { weight: 2.5, glowWeight: 7, dashArray: "4, 8", dimWeight: 2, dimDash: "4, 6" },
+  car: { weight: 6, glowWeight: 0, dimWeight: 4, dimDash: "6, 8" },
+  bike: { weight: 4, glowWeight: 0, dashArray: "10, 6", dimWeight: 3, dimDash: "6, 8" },
+  walk: { weight: 2.5, glowWeight: 0, dashArray: "4, 8", dimWeight: 2, dimDash: "4, 6" },
 };
 
 const createHospitalIcon = (status: string, isSelected: boolean) => {
@@ -89,7 +90,7 @@ const createHospitalIcon = (status: string, isSelected: boolean) => {
       background: ${color};
       border-radius: 50%;
       border: ${borderWidth}px solid rgba(255,255,255,${isSelected ? 0.95 : 0.5});
-      box-shadow: 0 0 ${glowSize}px ${color}, 0 2px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
       transition: all 0.3s ease;
     "></div>`,
     iconSize: [size, size],
@@ -130,6 +131,7 @@ const staggerContainer = {
 
 const Routing = () => {
   const { toast } = useToast();
+  const location = useLocation();
   const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   const [roadRoutes, setRoadRoutes] = useState<RoadRoute[]>([]);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number>(0);
@@ -183,6 +185,16 @@ const Routing = () => {
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
+
+  // Handle passed state from other pages (e.g. "Route Now" from Hospitals list)
+  useEffect(() => {
+    const passedState = location.state as { selectedHospital?: string } | null;
+    if (passedState?.selectedHospital && hospitalData.length > 0) {
+      handleSelectHospital(passedState.selectedHospital);
+      // Clear state so it doesn't re-trigger on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, hospitalData.length]);
 
   const handleSelectHospital = useCallback(
     async (hospitalName: string) => {
@@ -306,7 +318,7 @@ const Routing = () => {
                           locationStatus === "success"
                             ? "text-success"
                             : locationStatus === "loading"
-                            ? "text-warning animate-pulse"
+                            ? "text-warning"
                             : "text-muted-foreground"
                         }`}
                       />
@@ -322,7 +334,7 @@ const Routing = () => {
                     </div>
                     {locationStatus === "success" && (
                       <span className="flex items-center gap-1 text-[10px] text-success">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         LIVE
                       </span>
                     )}
@@ -359,7 +371,7 @@ const Routing = () => {
                   <Button
                     onClick={handleAutoRoute}
                     disabled={routeLoading}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-green font-semibold gap-2"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2"
                     size="lg"
                   >
                     <Zap className="h-4 w-4" />
@@ -525,7 +537,7 @@ const Routing = () => {
                   </p>
                   {isHospitalsLoading ? (
                     <div className="py-8 flex justify-center text-primary">
-                      <span className="animate-pulse text-xs font-mono">LOADING LIVE DATA...</span>
+                      <span className="text-xs font-mono">LOADING LIVE DATA...</span>
                     </div>
                   ) : (
                   <motion.div
@@ -748,7 +760,7 @@ const Routing = () => {
                   {/* Map label + mode indicator */}
                   <div className="absolute top-4 left-4 z-[1000]">
                     <div className="flex items-center gap-2 rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-1.5 shadow-sm">
-                      <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="h-2 w-2 rounded-full bg-primary" />
                       <span className="text-[10px] font-mono text-secondary tracking-wider">SMART ROUTING • LIVE</span>
                       <div className="h-3 w-px bg-border" />
                       {(() => {
@@ -763,7 +775,7 @@ const Routing = () => {
                   {routeLoading && (
                     <div className="absolute top-4 right-4 z-[1000]">
                       <div className="flex items-center gap-2 rounded-lg border border-border bg-card/90 backdrop-blur-sm px-3 py-1.5 shadow-sm">
-                        <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
+                        <span className="h-2 w-2 rounded-full bg-primary" />
                         <span className="text-[10px] font-mono text-primary tracking-wider">CALCULATING ROUTE...</span>
                       </div>
                     </div>

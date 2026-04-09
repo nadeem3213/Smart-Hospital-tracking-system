@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Bed, UserCheck, Clock, ArrowRight, Building2, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HospitalCardProps {
   name: string;
@@ -25,6 +26,7 @@ const HospitalCard = ({
   name, type, distance, eta, icuBeds, generalBeds, doctors, specialization, status, index,
 }: HospitalCardProps) => {
   const s = statusStyles[status];
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -85,6 +87,7 @@ const HospitalCard = ({
       </div>
 
       <Button
+        onClick={() => navigate("/routing")}
         className="w-full bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/20 gap-2 text-xs"
         size="sm"
       >

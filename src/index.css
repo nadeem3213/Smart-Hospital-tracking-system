@@ -52,32 +52,32 @@
   }
 
   .dark {
-    --background: 220 20% 6%;
-    --foreground: 210 20% 92%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 95%;
 
-    --card: 220 18% 10%;
-    --card-foreground: 210 20% 92%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 220 18% 10%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 95%;
 
     --primary: 0 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 185 80% 45%;
-    --secondary-foreground: 220 20% 6%;
+    --secondary: 185 80% 40%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 45 95% 55%;
-    --accent-foreground: 220 20% 6%;
+    --accent: 45 95% 50%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 0 85% 55%;
 
     --emergency-glow: 0 85% 55%;
@@ -85,13 +85,13 @@
     --success: 145 65% 42%;
     --warning: 45 95% 55%;
 
-    --sidebar-background: 220 18% 8%;
-    --sidebar-foreground: 210 20% 92%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 0 85% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 220 15% 18%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
     --sidebar-ring: 0 85% 55%;
   }
 }
@@ -106,47 +106,7 @@
 }
 
 @layer utilities {
-  .glow-red {
-    box-shadow: 0 0 20px hsl(0 85% 55% / 0.3), 0 0 60px hsl(0 85% 55% / 0.1);
-  }
-  .glow-cyan {
-    box-shadow: 0 0 20px hsl(185 80% 45% / 0.3), 0 0 60px hsl(185 80% 45% / 0.1);
-  }
-  .glow-text-red {
-    text-shadow: 0 0 20px hsl(0 85% 55% / 0.5);
-  }
-  .glow-text-cyan {
-    text-shadow: 0 0 20px hsl(185 80% 45% / 0.5);
-  }
-  .grid-bg {
-    background-image:
-      linear-gradient(hsl(220 15% 18% / 0.5) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(220 15% 18% / 0.5) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-  .scan-line {
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      hsl(185 80% 45% / 0.03) 50%,
-      transparent 100%
-    );
-    animation: scan 4s linear infinite;
-  }
-}
-
-@keyframes scan {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(2.5); opacity: 0; }
-}
-
-@keyframes dash {
-  to { stroke-dashoffset: -20; }
+  /* Added base utilities for map that don't need complex animations */
 }
 
 /* Leaflet map marker styles */
@@ -162,7 +122,7 @@
   inset: 0;
   border-radius: 50%;
   border: 2px solid #3b82f6;
-  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  opacity: 0.6;
 }
 
 .user-dot {
@@ -183,7 +143,7 @@
   inset: 0;
   border-radius: 50%;
   border: 2px solid hsl(0 85% 55%);
-  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  opacity: 0.6;
 }
 
 .ambulance-dot {

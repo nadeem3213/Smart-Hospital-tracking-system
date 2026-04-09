@@ -2,16 +2,27 @@ import { motion } from "framer-motion";
 import { Navigation, Zap, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PulseMap from "./PulseMap";
+import { useHospitals } from "@/hooks/useHospitals";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const { data: hospitalData = [] } = useHospitals();
+  const navigate = useNavigate();
+
+  const heroStats = useMemo(() => {
+    const totalDoctors = hospitalData.reduce((s, h) => s + (h.doctors || 0), 0);
+    const totalBeds = hospitalData.reduce((s, h) => s + (h.icuBeds || 0) + (h.generalBeds || 0), 0);
+
+    return [
+      { value: hospitalData.length > 0 ? `${hospitalData.length}` : "...", label: "Hospitals Live" },
+      { value: totalDoctors > 0 ? `${totalDoctors}+` : "...", label: "Specialists On-Call" },
+      { value: totalBeds > 0 ? `${totalBeds}` : "...", label: "Emergency Beds" },
+    ];
+  }, [hospitalData]);
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
-      {/* Grid background */}
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      {/* Scan line effect */}
-      <div className="absolute inset-0 scan-line pointer-events-none" />
-      {/* Radial gradient overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_85%_55%/0.08)_0%,transparent_70%)]" />
+      {/* Solid background layout */}
 
       <div className="container relative z-10 grid lg:grid-cols-2 gap-12 items-center py-20">
         <motion.div
@@ -25,16 +36,16 @@ const HeroSection = () => {
             transition={{ delay: 0.2 }}
             className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 mb-6"
           >
-            <span className="h-2 w-2 rounded-full bg-primary animate-pulse-slow" />
+            <span className="h-2 w-2 rounded-full bg-primary" />
             <span className="text-xs font-mono text-primary tracking-wider">LIVE EMERGENCY SYSTEM</span>
           </motion.div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight mb-6">
             <span className="text-foreground">Smart Hospital</span>
             <br />
-            <span className="text-primary glow-text-red">Emergency</span>
+            <span className="text-primary">Emergency</span>
             <br />
-            <span className="text-secondary glow-text-cyan">Routing</span>
+            <span className="text-secondary">Routing</span>
           </h1>
 
           <p className="text-muted-foreground text-lg max-w-md mb-8 leading-relaxed">
@@ -45,7 +56,8 @@ const HeroSection = () => {
           <div className="flex flex-wrap gap-4">
             <Button
               size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 glow-red font-semibold gap-2"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2"
+              onClick={() => navigate("/routing")}
             >
               <Zap className="h-4 w-4" />
               Emergency Route
@@ -54,6 +66,7 @@ const HeroSection = () => {
               size="lg"
               variant="outline"
               className="border-secondary/30 text-secondary hover:bg-secondary/10 gap-2"
+              onClick={() => navigate("/hospitals")}
             >
               <Navigation className="h-4 w-4" />
               Find Hospital
@@ -61,11 +74,7 @@ const HeroSection = () => {
           </div>
 
           <div className="mt-10 flex gap-8">
-            {[
-              { value: "< 8s", label: "Avg Response" },
-              { value: "147", label: "Hospitals Live" },
-              { value: "99.7%", label: "Uptime" },
-            ].map((stat, i) => (
+            {heroStats.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}

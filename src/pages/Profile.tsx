@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE } from "@/config";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -97,7 +98,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-const API_BASE = "http://localhost:5000";
+
 
 const Profile = () => {
   const navigate = useNavigate();

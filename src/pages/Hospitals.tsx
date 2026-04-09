@@ -15,15 +15,18 @@ import {
   X,
   ChevronDown,
   Stethoscope,
+  ArrowRight,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useHospitals } from "@/hooks/useHospitals";
 import type { Hospital } from "@/data/hospitals";
-import { haversineDistance, AMBULANCE_POSITION } from "@/lib/dijkstra";
+import { haversineDistance } from "@/lib/dijkstra";
+import { AMBULANCE_POSITION } from "@/data/hospitals";
 
 /* ------------------------------------------------------------------ */
 /*  Constants & helpers                                                */
@@ -116,6 +119,7 @@ function RatingStars({ rating }: { rating: number }) {
 /* ------------------------------------------------------------------ */
 
 const Hospitals = () => {
+  const navigate = useNavigate();
   const { data: hospitalData = [] } = useHospitals();
   /* ---- state ---- */
   const [search, setSearch] = useState("");
@@ -219,18 +223,18 @@ const Hospitals = () => {
       <main className="flex-1 pt-16">
         {/* ── Hero / Header ── */}
         <section className="relative overflow-hidden border-b border-border bg-card/30">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,206,209,0.06),transparent_60%)]" />
+          {/* Removed background gradient */}
           <div className="container relative z-10 py-12 md:py-16 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/10 glow-cyan">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/10">
                 <Stethoscope className="h-7 w-7 text-secondary" />
               </div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                Hospital <span className="text-secondary glow-text-cyan">Directory</span>
+                Hospital <span className="text-secondary">Directory</span>
               </h1>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Browse all hospitals in the MediRoute network — filter, compare, and find
@@ -417,7 +421,7 @@ const Hospitals = () => {
                       <Heart
                         className={`h-5 w-5 transition-colors ${
                           isFav
-                            ? "fill-primary text-primary glow-text-red"
+                            ? "fill-primary text-primary"
                             : "text-muted-foreground/40 hover:text-primary/60"
                         }`}
                       />
@@ -451,7 +455,7 @@ const Hospitals = () => {
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-mono font-semibold ${s.bg} ${s.text}`}
                           >
                             <span
-                              className={`inline-block h-1.5 w-1.5 rounded-full ${s.dot} animate-pulse`}
+                              className={`inline-block h-1.5 w-1.5 rounded-full ${s.dot}`}
                             />
                             {s.label}
                           </span>
@@ -559,6 +563,17 @@ const Hospitals = () => {
                           </span>
                         </span>
                       </div>
+                    </div>
+
+                    {/* ── Action button ── */}
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => navigate("/routing", { state: { selectedHospital: hospital.name } })}
+                        className="w-full bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/20 gap-2 text-xs font-mono"
+                        size="sm"
+                      >
+                        Route Now <ArrowRight className="h-3 w-3" />
+                      </Button>
                     </div>
                   </motion.div>
                 );

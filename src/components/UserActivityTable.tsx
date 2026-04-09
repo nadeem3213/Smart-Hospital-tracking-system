@@ -10,6 +10,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_BASE } from "@/config";
 
 interface CaseRecord {
   caseId: string;
@@ -28,6 +30,7 @@ const statusConfig: Record<string, { icon: typeof CheckCircle; className: string
 };
 
 const UserActivityTable = () => {
+  const navigate = useNavigate();
   const [cases, setCases] = useState<CaseRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,7 +41,7 @@ const UserActivityTable = () => {
       return;
     }
 
-    fetch("http://localhost:5000/api/visits", {
+    fetch(`${API_BASE}/api/visits`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -124,9 +127,14 @@ const UserActivityTable = () => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1.5">
-                    <Hospital className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-sm text-foreground">{record.hospital}</span>
+                  <div 
+                    onClick={() => navigate("/routing", { state: { selectedHospital: record.hospital } })}
+                    className="flex items-center gap-1.5 cursor-pointer group/hosp"
+                  >
+                    <Hospital className="h-3.5 w-3.5 text-muted-foreground group-hover/hosp:text-secondary transition-colors" />
+                    <span className="text-sm text-foreground group-hover/hosp:text-secondary group-hover/hosp:underline transition-all">
+                      {record.hospital}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>

@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-
-const JWT_SECRET = process.env.JWT_SECRET || "mediroute-secret-key";
+const { JWT_SECRET } = require("../config");
 
 function authenticateToken(req, res, next) {
   try {

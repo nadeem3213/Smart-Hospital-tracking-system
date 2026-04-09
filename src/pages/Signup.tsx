@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE } from "@/config";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -50,7 +51,7 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch(`${API_BASE}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, lat, lng }),
@@ -74,9 +75,7 @@ const Signup = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <div className="absolute inset-0 scan-line pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(185_80%_45%/0.06)_0%,transparent_70%)]" />
+      {/* Solid background layout */}
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -86,9 +85,9 @@ const Signup = () => {
       >
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 glow-red">
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <Activity className="h-6 w-6 text-primary" />
-              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary animate-pulse-slow" />
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
             </div>
             <div className="text-left">
               <h1 className="text-lg font-bold tracking-wide text-foreground">
@@ -100,12 +99,12 @@ const Signup = () => {
             </div>
           </Link>
           <h2 className="text-2xl font-bold text-foreground">
-            Create <span className="text-secondary glow-text-cyan">Account</span>
+            Create <span className="text-secondary">Account</span>
           </h2>
           <p className="text-sm text-muted-foreground mt-1">Register to join the dispatch network</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/60 backdrop-blur-sm p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-xs font-mono text-muted-foreground tracking-wider">
               FULL NAME
@@ -214,7 +213,7 @@ const Signup = () => {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 glow-cyan font-semibold gap-2"
+            className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold gap-2"
           >
             {loading ? (
               <span className="font-mono text-xs">CREATING ACCOUNT...</span>

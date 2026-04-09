@@ -1,8 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-
-const JWT_SECRET = process.env.JWT_SECRET || "mediroute-secret-key";
-const JWT_EXPIRES_IN = "7d";
+const { JWT_SECRET, JWT_EXPIRES_IN } = require("../config");
 
 function generateToken(userId) {
   return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
