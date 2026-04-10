@@ -7,12 +7,25 @@ import EditHospitalModal from "./EditHospitalModal";
 
 import { useHospitals } from "../hooks/useHospitals";
 import type { Hospital } from "../data/hospitals";
+import { haversineDistance } from "../lib/dijkstra";
+
+const AMBULANCE_POSITION: [number, number] = [18.5204, 73.8567]; // Pune
 
 const HospitalDashboard = () => {
   const [filter, setFilter] = useState<"all" | "government" | "private">("all");
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingHospital, setEditingHospital] = useState<Hospital | null>(null);
+  const [userPos, setUserPos] = useState<[number, number]>(AMBULANCE_POSITION);
   const { data: hospitalData = [], isLoading } = useHospitals();
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserPos([pos.coords.latitude, pos.coords.longitude]),
+        () => setUserPos(AMBULANCE_POSITION)
+      );
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -27,6 +40,20 @@ const HospitalDashboard = () => {
   }, []);
 
   const filtered = filter === "all" ? hospitalData : hospitalData.filter((h) => h.type === filter);
+
+  const hospitalsWithLiveDistance = filtered.map(h => {
+    if (h.lat && h.lng) {
+      const dist = haversineDistance(userPos[0], userPos[1], h.lat, h.lng);
+      // rough eta: ~3 min per km, minimum 1 min
+      const etaMins = Math.max(1, Math.round(dist * 3));
+      return { 
+        ...h, 
+        distance: `${dist.toFixed(1)} km`, 
+        eta: `${etaMins} min` 
+      };
+    }
+    return h;
+  });
 
   return (
     <section id="hospitals" className="relative py-20">
@@ -79,14 +106,14 @@ const HospitalDashboard = () => {
             <div className="col-span-full py-10 flex justify-center text-primary">
               <span className="animate-pulse">Loading Live Data...</span>
             </div>
-          ) : filtered.length > 0 ? (
-            filtered.map((h, i) => (
+          ) : hospitalsWithLiveDistance.length > 0 ? (
+            hospitalsWithLiveDistance.map((h, i) => (
               <HospitalCard
                 key={h.name}
                 {...h}
                 index={i}
                 isAdmin={isAdmin}
-                onEdit={() => setEditingHospital(h)}
+                onEdit={() => setEditingHospital(h as Hospital)}
               />
             ))
           ) : (

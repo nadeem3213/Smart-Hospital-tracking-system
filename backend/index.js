@@ -7,6 +7,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const hospitalRoutes = require("./routes/hospitalRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 const { seedAdmin } = require("./seedAdmin");
 
 const app = express();
@@ -20,6 +21,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/visits", visitRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/hospitals", hospitalRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "MediRoute API is running" });

@@ -15,6 +15,7 @@ import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminUsers from "./pages/AdminUsers.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import EmergencyChatbot from "./components/EmergencyChatbot.tsx";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <EmergencyChatbot />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

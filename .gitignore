@@ -29,3 +29,6 @@ bun.lock*
 bun.lockb
 playwright-fixture.ts
 playwright.config.ts
+
+.env
+backend/.env

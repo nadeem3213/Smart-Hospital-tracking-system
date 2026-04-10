@@ -169,15 +169,8 @@ const Hospitals = () => {
     });
   };
 
-  /* ---- derived: hospitals with live distance ---- */
-  const hospitalsWithDistance = useMemo(
-    () =>
-      hospitalData.map((h) => ({
-        ...h,
-        liveDistance: haversineDistance(userPos[0], userPos[1], h.lat, h.lng),
-      })),
-    [userPos, hospitalData]
-  );
+  /* ---- use raw hospital data ---- */
+  const hospitalsWithDistance = hospitalData;
 
   /* ---- filtered & sorted list ---- */
   const filtered = useMemo(() => {
@@ -204,7 +197,7 @@ const Hospitals = () => {
     // sort
     list = [...list].sort((a, b) => {
       if (sortKey === "rating") return b.rating - a.rating;
-      if (sortKey === "distance") return a.liveDistance - b.liveDistance;
+      if (sortKey === "distance") return parseFloat(a.distance || "0") - parseFloat(b.distance || "0");
       return a.name.localeCompare(b.name);
     });
 
@@ -548,7 +541,7 @@ const Hospitals = () => {
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3 text-secondary" />
                         <span className="font-mono font-semibold text-foreground">
-                          {hospital.liveDistance.toFixed(1)} km
+                          {hospital.distance}
                         </span>
                       </span>
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
