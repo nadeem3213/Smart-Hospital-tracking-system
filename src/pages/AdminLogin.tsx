@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Activity, LogIn, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Activity, LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { API_BASE } from "@/config";
 
-const Login = () => {
+const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      const res = await fetch(`${API_BASE}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -36,9 +36,8 @@ const Login = () => {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      const userName = data.user?.name || "User";
-      toast({ title: `Welcome back, ${userName}!`, description: "You are now connected to the dispatch network." });
-      navigate("/home");
+      toast({ title: "Welcome, Admin!", description: "You are now connected to the dispatch network." });
+      navigate("/admin/users");
     } catch {
       toast({ title: "Connection Error", description: "Could not connect to the server. Please make sure the backend is running.", variant: "destructive" });
     } finally {
@@ -48,8 +47,6 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Solid background layout */}
-
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -71,27 +68,30 @@ const Login = () => {
               </p>
             </div>
           </Link>
-          <h2 className="text-2xl font-bold text-foreground">
-            User <span className="text-secondary">Login</span>
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to access the dispatch system</p>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold text-foreground">
+              Admin <span className="text-primary">Login</span>
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">Sign in with admin credentials</p>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-6 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-xs font-mono text-muted-foreground tracking-wider">
-              EMAIL ADDRESS
+              ADMIN EMAIL
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="operator@mediroute.com"
+                placeholder="admin@hospital.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="pl-10 bg-muted/50 border-border focus:border-secondary/50 transition-colors"
+                className="pl-10 bg-muted/50 border-border focus:border-primary/50 transition-colors"
               />
             </div>
           </div>
@@ -109,7 +109,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="pl-10 pr-10 bg-muted/50 border-border focus:border-secondary/50 transition-colors"
+                className="pl-10 pr-10 bg-muted/50 border-border focus:border-primary/50 transition-colors"
               />
               <button
                 type="button"
@@ -131,38 +131,27 @@ const Login = () => {
             ) : (
               <>
                 <LogIn className="h-4 w-4" />
-                Sign In
+                Sign In as Admin
               </>
             )}
           </Button>
 
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link
-                to="/signup"
-                className="text-secondary hover:text-secondary/80 font-medium inline-flex items-center gap-1 transition-colors"
-              >
-                Create Account <ArrowRight className="h-3 w-3" />
-              </Link>
-            </p>
-            <p>
-              <Link
-                to="/"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                ← Back to role selection
-              </Link>
-            </p>
+          <div className="text-center">
+            <Link
+              to="/"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← Back to role selection
+            </Link>
           </div>
         </form>
 
         <p className="text-center text-xs text-muted-foreground font-mono mt-6 tracking-wider">
-          SECURE • ENCRYPTED • HIPAA COMPLIANT
+          ADMIN ACCESS • RESTRICTED • AUTHORIZED PERSONNEL ONLY
         </p>
       </motion.div>
     </div>
   );
 };
 
-export default Login;
+export default AdminLogin;

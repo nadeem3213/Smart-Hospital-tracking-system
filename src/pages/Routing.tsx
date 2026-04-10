@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import {
   Zap, MapPin, Clock, Route, ArrowRight, Activity,
@@ -22,6 +22,7 @@ type TravelMode = "car" | "bike" | "walk";
 const TRAVEL_SPEEDS: Record<TravelMode, number> = { car: 40, bike: 15, walk: 5 };
 const TRAVEL_LABELS: Record<TravelMode, string> = { car: "Car", bike: "Bike", walk: "Walk" };
 const TRAVEL_ICONS: Record<TravelMode, typeof Car> = { car: Car, bike: Bike, walk: Footprints };
+const OSRM_PROFILES: Record<TravelMode, string> = { car: "car", bike: "bike", walk: "foot" };
 
 const statusColors: Record<string, string> = {
   available: "hsl(145, 65%, 42%)",
@@ -44,9 +45,11 @@ interface RoadRoute {
 
 async function fetchOSRMRoutes(
   from: [number, number],
-  to: [number, number]
+  to: [number, number],
+  mode: TravelMode
 ): Promise<RoadRoute[]> {
-  const url = `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson&alternatives=true`;
+  const profile = OSRM_PROFILES[mode];
+  const url = `https://router.project-osrm.org/route/v1/${profile}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson&alternatives=true`;
   const res = await fetch(url);
   const data = await res.json();
 
@@ -61,9 +64,9 @@ async function fetchOSRMRoutes(
   }));
 }
 
-function getEtaForMode(distKm: number, mode: TravelMode, drivingDurationMin?: number): number {
-  if (drivingDurationMin !== undefined && mode === "car") {
-    return drivingDurationMin;
+function getEtaForMode(distKm: number, mode: TravelMode, activeMode: TravelMode, osrmDurationMin?: number): number {
+  if (osrmDurationMin !== undefined && mode === activeMode) {
+    return osrmDurationMin;
   }
   return Math.round((distKm / TRAVEL_SPEEDS[mode]) * 60 * 10) / 10;
 }
@@ -104,6 +107,17 @@ const userLocationIcon = L.divIcon({
   html: `<div class="user-pulse-ring"></div><div class="user-dot"></div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
+});
+
+const destinationPinIcon = L.divIcon({
+  className: "destination-pin-marker",
+  html: `<svg viewBox="0 0 32 44" width="32" height="44" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 28 16 28s16-16 16-28C32 7.16 24.84 0 16 0z" fill="#ef4444" stroke="white" stroke-width="2.5"/>
+    <circle cx="16" cy="16" r="6" fill="white"/>
+  </svg>`,
+  iconSize: [32, 44],
+  iconAnchor: [16, 44],
+  popupAnchor: [0, -44],
 });
 
 const FitRoute = ({ roadRoutes, userPosition }: { roadRoutes: RoadRoute[]; userPosition: [number, number] }) => {
@@ -209,7 +223,7 @@ const Routing = () => {
       }
 
       try {
-        const routes = await fetchOSRMRoutes(userPosition, [hospital.lat, hospital.lng]);
+        const routes = await fetchOSRMRoutes(userPosition, [hospital.lat, hospital.lng], travelMode);
         setRoadRoutes(routes);
       } catch {
         setRoadRoutes([]);
@@ -218,8 +232,31 @@ const Routing = () => {
         setRouteLoading(false);
       }
     },
-    [userPosition]
+    [userPosition, travelMode]
   );
+
+  useEffect(() => {
+    if (!selectedHospital) return;
+    const hospital = hospitalData.find(h => h.name === selectedHospital);
+    if (!hospital) return;
+
+    let cancelled = false;
+    setRouteLoading(true);
+    setSelectedRouteIndex(0);
+
+    fetchOSRMRoutes(userPosition, [hospital.lat, hospital.lng], travelMode)
+      .then(routes => { if (!cancelled) setRoadRoutes(routes); })
+      .catch(() => {
+        if (!cancelled) {
+          setRoadRoutes([]);
+          toast({ title: "Routing Error", description: "Could not fetch route for this travel mode.", variant: "destructive" });
+        }
+      })
+      .finally(() => { if (!cancelled) setRouteLoading(false); });
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [travelMode]);
 
   const handleAutoRoute = useCallback(async () => {
     let bestHospital: Hospital | null = null;
@@ -390,7 +427,7 @@ const Routing = () => {
                     >
                       <p className="text-[10px] font-mono text-muted-foreground tracking-wider">ROUTE OPTIONS</p>
                       {roadRoutes.map((route, index) => {
-                        const modeEta = getEtaForMode(route.distanceKm, travelMode, route.durationMin);
+                        const modeEta = getEtaForMode(route.distanceKm, travelMode, travelMode, route.durationMin);
                         return (
                           <motion.button
                             key={index}
@@ -421,7 +458,7 @@ const Routing = () => {
                             <div className="flex items-center gap-2">
                               {(["car", "bike", "walk"] as TravelMode[]).map((m) => {
                                 const MIcon = TRAVEL_ICONS[m];
-                                const mEta = getEtaForMode(route.distanceKm, m, m === "car" ? route.durationMin : undefined);
+                                const mEta = getEtaForMode(route.distanceKm, m, travelMode, route.durationMin);
                                 return (
                                   <span
                                     key={m}
@@ -591,7 +628,7 @@ const Routing = () => {
                                 <MapPin className="h-3 w-3" /> {distFromUser} km
                               </span>
                               <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" /> ~{getEtaForMode(distFromUser, travelMode)} min
+                                <Clock className="h-3 w-3" /> ~{getEtaForMode(distFromUser, travelMode, travelMode)} min
                               </span>
                             </div>
                           </div>
@@ -663,6 +700,8 @@ const Routing = () => {
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
 
+                    <ZoomControl position="bottomright" />
+
                     <FitRoute roadRoutes={roadRoutes} userPosition={userPosition} />
 
                     {/* User location */}
@@ -710,6 +749,26 @@ const Routing = () => {
                         </Popup>
                       </Marker>
                     ))}
+
+                    {/* Destination pin marker */}
+                    {activeHospital && roadRoutes.length > 0 && (
+                      <Marker
+                        position={[activeHospital.lat, activeHospital.lng]}
+                        icon={destinationPinIcon}
+                        zIndexOffset={1000}
+                      >
+                        <Popup>
+                          <div className="map-popup-content">
+                            <div className="flex items-center gap-2 mb-1">
+                              <MapPin className="h-3.5 w-3.5 text-red-500" />
+                              <span className="font-semibold text-sm">Destination</span>
+                            </div>
+                            <p className="text-xs font-medium">{activeHospital.name}</p>
+                            <p className="text-xs text-muted-foreground">{activeHospital.specialization}</p>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    )}
 
                     {/* Non-selected routes (dimmed) */}
                     {roadRoutes.map((route, index) => {
@@ -807,7 +866,7 @@ const Routing = () => {
 
                           {(["car", "bike", "walk"] as TravelMode[]).map((mode) => {
                             const Icon = TRAVEL_ICONS[mode];
-                            const eta = getEtaForMode(activeRoute.distanceKm, mode, mode === "car" ? activeRoute.durationMin : undefined);
+                            const eta = getEtaForMode(activeRoute.distanceKm, mode, travelMode, activeRoute.durationMin);
                             return (
                               <div
                                 key={mode}
@@ -859,7 +918,7 @@ const Routing = () => {
                         </div>
                         {(["car", "bike", "walk"] as TravelMode[]).map((mode) => {
                           const Icon = TRAVEL_ICONS[mode];
-                          const eta = getEtaForMode(activeRoute.distanceKm, mode, mode === "car" ? activeRoute.durationMin : undefined);
+                          const eta = getEtaForMode(activeRoute.distanceKm, mode, travelMode, activeRoute.durationMin);
                           return (
                             <div
                               key={mode}

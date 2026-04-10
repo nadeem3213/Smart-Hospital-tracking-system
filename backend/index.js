@@ -3,9 +3,11 @@ const cors = require("cors");
 const { connectToMongoDB } = require("./connect");
 const { PORT, MONGODB_URI } = require("./config");
 const authRoutes = require("./routes/authRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const hospitalRoutes = require("./routes/hospitalRoutes");
+const { seedAdmin } = require("./seedAdmin");
 
 const app = express();
 
@@ -14,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/visits", visitRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/hospitals", hospitalRoutes);
@@ -23,8 +26,9 @@ app.get("/", (req, res) => {
 });
 
 connectToMongoDB(MONGODB_URI)
-  .then(() => {
+  .then(async () => {
     console.log("Connected to MongoDB");
+    await seedAdmin();
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });

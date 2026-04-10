@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Stethoscope,
   ArrowRight,
+  Pencil,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EditHospitalModal from "@/components/EditHospitalModal";
 import { useHospitals } from "@/hooks/useHospitals";
 import type { Hospital } from "@/data/hospitals";
 import { haversineDistance } from "@/lib/dijkstra";
@@ -129,6 +131,21 @@ const Hospitals = () => {
   const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
   const [userPos, setUserPos] = useState<[number, number]>(AMBULANCE_POSITION);
   const [showFilters, setShowFilters] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editingHospital, setEditingHospital] = useState<Hospital | null>(null);
+
+  /* ---- admin check ---- */
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setIsAdmin(parsed.role === "admin");
+      }
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
 
   /* ---- geolocation ---- */
   useEffect(() => {
@@ -566,14 +583,24 @@ const Hospitals = () => {
                     </div>
 
                     {/* ── Action button ── */}
-                    <div className="mt-4">
+                    <div className="mt-4 flex gap-2">
                       <Button
                         onClick={() => navigate("/routing", { state: { selectedHospital: hospital.name } })}
-                        className="w-full bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/20 gap-2 text-xs font-mono"
+                        className="flex-1 bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/20 gap-2 text-xs font-mono"
                         size="sm"
                       >
                         Route Now <ArrowRight className="h-3 w-3" />
                       </Button>
+                      {isAdmin && (
+                        <Button
+                          onClick={() => setEditingHospital(hospital)}
+                          variant="outline"
+                          size="sm"
+                          className="border-primary/30 text-primary hover:bg-primary/10 gap-1 text-xs font-mono"
+                        >
+                          <Pencil className="h-3 w-3" /> Edit
+                        </Button>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -584,6 +611,14 @@ const Hospitals = () => {
       </main>
 
       <Footer />
+
+      {editingHospital && (
+        <EditHospitalModal
+          hospital={editingHospital}
+          open={!!editingHospital}
+          onOpenChange={(open) => { if (!open) setEditingHospital(null); }}
+        />
+      )}
     </div>
   );
 };

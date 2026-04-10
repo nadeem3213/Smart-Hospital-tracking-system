@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import { useEffect, useMemo } from "react";
 import { Bed, UserCheck, Clock, MapPin, Navigation } from "lucide-react";
@@ -104,6 +104,8 @@ const MapComponent = ({ hospitals, selectedHospital, onSelectHospital }: MapComp
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <ZoomControl position="bottomright" />
 
         <MapController selectedHospital={selectedHospital} hospitals={hospitals} />
 

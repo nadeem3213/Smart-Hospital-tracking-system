@@ -1,15 +1,30 @@
 import { motion } from "framer-motion";
 import { Search, Filter } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HospitalCard from "./HospitalCard";
 import AddHospitalModal from "./AddHospitalModal";
+import EditHospitalModal from "./EditHospitalModal";
 
 import { useHospitals } from "../hooks/useHospitals";
 import type { Hospital } from "../data/hospitals";
 
 const HospitalDashboard = () => {
   const [filter, setFilter] = useState<"all" | "government" | "private">("all");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editingHospital, setEditingHospital] = useState<Hospital | null>(null);
   const { data: hospitalData = [], isLoading } = useHospitals();
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setIsAdmin(parsed.role === "admin");
+      }
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
 
   const filtered = filter === "all" ? hospitalData : hospitalData.filter((h) => h.type === filter);
 
@@ -51,9 +66,11 @@ const HospitalDashboard = () => {
                 </button>
               ))}
             </div>
-            <div className="ml-auto">
-              <AddHospitalModal />
-            </div>
+            {isAdmin && (
+              <div className="ml-auto">
+                <AddHospitalModal />
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -64,7 +81,13 @@ const HospitalDashboard = () => {
             </div>
           ) : filtered.length > 0 ? (
             filtered.map((h, i) => (
-              <HospitalCard key={h.name} {...h} index={i} />
+              <HospitalCard
+                key={h.name}
+                {...h}
+                index={i}
+                isAdmin={isAdmin}
+                onEdit={() => setEditingHospital(h)}
+              />
             ))
           ) : (
             <div className="col-span-full text-center py-10 text-muted-foreground">
@@ -72,6 +95,14 @@ const HospitalDashboard = () => {
             </div>
           )}
         </div>
+
+        {editingHospital && (
+          <EditHospitalModal
+            hospital={editingHospital}
+            open={!!editingHospital}
+            onOpenChange={(open) => { if (!open) setEditingHospital(null); }}
+          />
+        )}
       </div>
     </section>
   );

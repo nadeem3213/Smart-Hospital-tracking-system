@@ -91,8 +91,39 @@ const getStats = async (req, res) => {
   }
 };
 
+// @desc    Update a hospital
+// @route   PUT /api/hospitals/:id
+// @access  Admin
+const updateHospital = async (req, res) => {
+  try {
+    const hospital = await Hospital.findById(req.params.id);
+    if (!hospital) {
+      return res.status(404).json({ message: "Hospital not found" });
+    }
+
+    const allowedFields = [
+      "name", "type", "icuBeds", "generalBeds", "doctors",
+      "specialization", "status", "rating", "description",
+      "phone", "email", "established", "specialties",
+    ];
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        hospital[field] = req.body[field];
+      }
+    }
+
+    const updated = await hospital.save();
+    res.json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error updating hospital" });
+  }
+};
+
 module.exports = {
   getHospitals,
   createHospital,
   getStats,
+  updateHospital,
 };

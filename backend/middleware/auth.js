@@ -18,4 +18,13 @@ function authenticateToken(req, res, next) {
   }
 }
 
-module.exports = { authenticateToken };
+function authenticateAdmin(req, res, next) {
+  authenticateToken(req, res, () => {
+    if (req.user && req.user.role === "admin") {
+      return next();
+    }
+    return res.status(403).json({ message: "Admin access required" });
+  });
+}
+
+module.exports = { authenticateToken, authenticateAdmin };

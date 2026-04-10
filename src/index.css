@@ -109,10 +109,17 @@
   /* Added base utilities for map that don't need complex animations */
 }
 
+/* Hide browser native password reveal button (Edge/Chrome on Windows) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 /* Leaflet map marker styles */
 .hospital-marker,
 .user-location-marker,
-.ambulance-marker {
+.ambulance-marker,
+.destination-pin-marker {
   background: transparent !important;
   border: none !important;
 }

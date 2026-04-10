@@ -35,6 +35,7 @@ const Navbar = () => {
   const [time, setTime] = useState(new Date());
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const navigate = useNavigate();
 
@@ -74,13 +75,16 @@ const Navbar = () => {
         setIsLoggedIn(true);
         try {
           const parsed = JSON.parse(user);
-          setUserName(parsed.name || "User");
+          setUserName(parsed.name || (parsed.role === "admin" ? "Admin" : "User"));
+          setIsAdmin(parsed.role === "admin");
         } catch {
           setUserName("User");
+          setIsAdmin(false);
         }
       } else {
         setIsLoggedIn(false);
         setUserName("");
+        setIsAdmin(false);
       }
     };
 
@@ -120,10 +124,11 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+          <Link to="/home" className="hover:text-foreground transition-colors">Home</Link>
           <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
           <Link to="/hospitals" className="hover:text-foreground transition-colors">Hospitals</Link>
           <Link to="/routing" className="hover:text-foreground transition-colors">Routing</Link>
+          {isAdmin && <Link to="/admin/users" className="hover:text-primary transition-colors text-primary/80 font-medium">User Profiles</Link>}
         </div>
 
         <div className="flex items-center gap-3">

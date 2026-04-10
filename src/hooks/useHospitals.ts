@@ -45,3 +45,32 @@ export const useAddHospital = () => {
     },
   });
 };
+
+// Update a hospital (admin only)
+export const useUpdateHospital = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Hospital> }) => {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update hospital");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hospitals"] });
+    },
+  });
+};

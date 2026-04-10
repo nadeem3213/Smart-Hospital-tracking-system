@@ -1,6 +1,7 @@
 import { DEFAULT_POSITION } from "@/config";
 
 export interface Hospital {
+  _id?: string;
   name: string;
   type: "government" | "private";
   distance: string;

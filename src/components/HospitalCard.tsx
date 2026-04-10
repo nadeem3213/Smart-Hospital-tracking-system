@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Bed, UserCheck, Clock, ArrowRight, Building2, Landmark } from "lucide-react";
+import { MapPin, Bed, UserCheck, Clock, ArrowRight, Building2, Landmark, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -14,6 +14,8 @@ interface HospitalCardProps {
   specialization: string;
   status: "available" | "busy" | "critical";
   index: number;
+  isAdmin?: boolean;
+  onEdit?: () => void;
 }
 
 const statusStyles: Record<string, { bg: string; text: string; label: string }> = {
@@ -23,7 +25,7 @@ const statusStyles: Record<string, { bg: string; text: string; label: string }> 
 };
 
 const HospitalCard = ({
-  name, type, distance, eta, icuBeds, generalBeds, doctors, specialization, status, index,
+  name, type, distance, eta, icuBeds, generalBeds, doctors, specialization, status, index, isAdmin, onEdit,
 }: HospitalCardProps) => {
   const s = statusStyles[status];
   const navigate = useNavigate();
@@ -86,13 +88,25 @@ const HospitalCard = ({
         </div>
       </div>
 
-      <Button
-        onClick={() => navigate("/routing")}
-        className="w-full bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/20 gap-2 text-xs"
-        size="sm"
-      >
-        Route Now <ArrowRight className="h-3 w-3" />
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          onClick={() => navigate("/routing")}
+          className="flex-1 bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/20 gap-2 text-xs"
+          size="sm"
+        >
+          Route Now <ArrowRight className="h-3 w-3" />
+        </Button>
+        {isAdmin && onEdit && (
+          <Button
+            onClick={onEdit}
+            variant="outline"
+            size="sm"
+            className="border-primary/30 text-primary hover:bg-primary/10 gap-1 text-xs"
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
     </motion.div>
   );
 };

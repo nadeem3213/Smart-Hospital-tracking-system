@@ -225,7 +225,7 @@ const Signup = () => {
             )}
           </Button>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link
@@ -233,6 +233,14 @@ const Signup = () => {
                 className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1 transition-colors"
               >
                 Sign In <ArrowRight className="h-3 w-3" />
+              </Link>
+            </p>
+            <p>
+              <Link
+                to="/"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Back to role selection
               </Link>
             </p>
           </div>
