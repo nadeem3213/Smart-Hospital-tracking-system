@@ -169,8 +169,21 @@ const Hospitals = () => {
     });
   };
 
-  /* ---- use raw hospital data ---- */
-  const hospitalsWithDistance = hospitalData;
+  /* ---- use dynamically computed distances ---- */
+  const hospitalsWithDistance = useMemo(() => {
+    return hospitalData.map(h => {
+      if (h.lat && h.lng) {
+        const dist = haversineDistance(userPos[0], userPos[1], h.lat, h.lng);
+        const etaMins = Math.max(1, Math.round(dist * 3));
+        return { 
+          ...h, 
+          distance: `${dist.toFixed(1)} km`, 
+          eta: `${etaMins} min` 
+        };
+      }
+      return h;
+    });
+  }, [hospitalData, userPos]);
 
   /* ---- filtered & sorted list ---- */
   const filtered = useMemo(() => {

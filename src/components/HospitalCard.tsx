@@ -48,43 +48,43 @@ const HospitalCard = ({
               <Building2 className="h-5 w-5 text-accent" />
             )}
           </div>
-          <div>
-            <h3 className="font-semibold text-foreground text-sm">{name}</h3>
-            <p className="text-xs text-muted-foreground capitalize">{type} Hospital</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-foreground text-sm truncate">{name}</h3>
+            <p className="text-[10px] sm:text-xs text-muted-foreground capitalize truncate">{type} Hospital</p>
           </div>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-[10px] font-mono font-semibold ${s.bg} ${s.text}`}>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[8px] sm:text-[10px] font-mono font-semibold ${s.bg} ${s.text}`}>
           {s.label}
         </span>
       </div>
 
-      <div className="mb-4 rounded-lg bg-muted/50 p-3">
-        <p className="text-xs font-mono text-secondary mb-1">{specialization}</p>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
+      <div className="mb-4 rounded-lg bg-muted/50 p-2.5 sm:p-3">
+        <p className="text-[11px] sm:text-xs font-mono text-secondary mb-1 truncate">{specialization}</p>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 shrink-0">
             <MapPin className="h-3 w-3" /> {distance}
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 shrink-0">
             <Clock className="h-3 w-3" /> ETA {eta}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="text-center rounded-lg border border-border p-2">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+        <div className="text-center rounded-lg border border-border p-1.5 sm:p-2">
           <Bed className="h-3.5 w-3.5 mx-auto text-secondary mb-1" />
-          <p className="text-sm font-bold font-mono text-foreground">{icuBeds}</p>
-          <p className="text-[10px] text-muted-foreground">ICU</p>
+          <p className="text-xs sm:text-sm font-bold font-mono text-foreground truncate">{icuBeds}</p>
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">ICU</p>
         </div>
-        <div className="text-center rounded-lg border border-border p-2">
+        <div className="text-center rounded-lg border border-border p-1.5 sm:p-2">
           <Bed className="h-3.5 w-3.5 mx-auto text-muted-foreground mb-1" />
-          <p className="text-sm font-bold font-mono text-foreground">{generalBeds}</p>
-          <p className="text-[10px] text-muted-foreground">General</p>
+          <p className="text-xs sm:text-sm font-bold font-mono text-foreground truncate">{generalBeds}</p>
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">General</p>
         </div>
-        <div className="text-center rounded-lg border border-border p-2">
+        <div className="text-center rounded-lg border border-border p-1.5 sm:p-2">
           <UserCheck className="h-3.5 w-3.5 mx-auto text-success mb-1" />
-          <p className="text-sm font-bold font-mono text-foreground">{doctors}</p>
-          <p className="text-[10px] text-muted-foreground">Doctors</p>
+          <p className="text-xs sm:text-sm font-bold font-mono text-foreground truncate">{doctors}</p>
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">Doctors</p>
         </div>
       </div>
 
