@@ -26,7 +26,6 @@ const EditHospitalModal = ({ hospital, open, onOpenChange }: EditHospitalModalPr
   const [icuBeds, setIcuBeds] = useState(0);
   const [generalBeds, setGeneralBeds] = useState(0);
   const [doctors, setDoctors] = useState(0);
-  const [rating, setRating] = useState(0);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [description, setDescription] = useState("");
@@ -40,7 +39,6 @@ const EditHospitalModal = ({ hospital, open, onOpenChange }: EditHospitalModalPr
       setIcuBeds(hospital.icuBeds);
       setGeneralBeds(hospital.generalBeds);
       setDoctors(hospital.doctors);
-      setRating(hospital.rating);
       setPhone(hospital.phone || "");
       setEmail(hospital.email || "");
       setDescription(hospital.description || "");
@@ -62,7 +60,6 @@ const EditHospitalModal = ({ hospital, open, onOpenChange }: EditHospitalModalPr
           icuBeds,
           generalBeds,
           doctors,
-          rating,
           phone,
           email,
           description,
@@ -158,10 +155,6 @@ const EditHospitalModal = ({ hospital, open, onOpenChange }: EditHospitalModalPr
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-xs font-mono text-muted-foreground uppercase">Rating (0-5)</Label>
-            <Input type="number" min="0" max="5" step="0.1" value={rating} onChange={(e) => setRating(parseFloat(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
-          </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-mono text-muted-foreground uppercase">Description</Label>

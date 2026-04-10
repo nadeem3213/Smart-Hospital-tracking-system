@@ -13,7 +13,6 @@ export interface Hospital {
   status: "available" | "busy" | "critical";
   lat: number;
   lng: number;
-  rating: number;
   description: string;
   phone: string;
   email: string;

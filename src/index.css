@@ -18,14 +18,14 @@
     --primary: 152 60% 36%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 20% 92%;
-    --secondary-foreground: 150 40% 20%;
+    --secondary: 185 80% 35%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 140 15% 95%;
     --muted-foreground: 150 10% 40%;
 
-    --accent: 152 50% 92%;
-    --accent-foreground: 152 60% 25%;
+    --accent: 45 95% 42%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;

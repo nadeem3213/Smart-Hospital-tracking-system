@@ -1,32 +1,32 @@
 import { motion } from "framer-motion";
-import { Phone, Cpu, Navigation, CheckCircle } from "lucide-react";
+import { Bot, Activity, Navigation, ShieldCheck } from "lucide-react";
 
 const steps = [
   {
-    icon: Phone,
-    title: "Emergency Alert",
-    description: "Patient or ambulance triggers an emergency request with location data.",
+    icon: Bot,
+    title: "AI Symptom Triage",
+    description: "Patients describe symptoms to our Neural AI to instantly match with the right specialist facility.",
     color: "text-primary",
     borderColor: "border-primary/30",
   },
   {
-    icon: Cpu,
-    title: "AI Analysis",
-    description: "System analyzes hospital beds, doctors, specialization, and traffic in real-time.",
+    icon: Activity,
+    title: "Live Availability Sync",
+    description: "The system scans a real-time websocket network for active ICU beds and emergency bandwidth.",
     color: "text-secondary",
     borderColor: "border-secondary/30",
   },
   {
     icon: Navigation,
-    title: "Optimal Route",
-    description: "Traffic-aware shortest path algorithm calculates the fastest route.",
+    title: "Intelligent Routing",
+    description: "Our algorithm calculates the absolute fastest, traffic-aware path to the selected medical center.",
     color: "text-accent",
     borderColor: "border-accent/30",
   },
   {
-    icon: CheckCircle,
-    title: "Patient Arrival",
-    description: "Hospital is pre-notified. Bed and team are ready on arrival.",
+    icon: ShieldCheck,
+    title: "Synchronized Arrival",
+    description: "Dashboards update globally before arrival, locking in load limits and preventing care overlaps.",
     color: "text-success",
     borderColor: "border-success/30",
   },

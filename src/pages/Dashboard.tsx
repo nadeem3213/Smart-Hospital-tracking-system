@@ -131,8 +131,6 @@ const Dashboard = () => {
     totalDoctors,
     totalICU,
     totalGeneral,
-    avgRating,
-    activeEmergencies,
     bedData,
     typeDistribution,
     statusDistribution,
@@ -143,18 +141,12 @@ const Dashboard = () => {
     const totalDoctors = hospitalData.reduce((s: any, h: any) => s + h.doctors, 0);
     const totalICU = hospitalData.reduce((s: any, h: any) => s + h.icuBeds, 0);
     const totalGeneral = hospitalData.reduce((s: any, h: any) => s + h.generalBeds, 0);
-    const avgRating = totalHospitals 
-      ? (hospitalData.reduce((s: any, h: any) => s + (h.rating || 0), 0) / totalHospitals).toFixed(1) 
-      : "0.0";
-    const activeEmergencies = hospitalData.filter((h: any) => h.status === "critical").length;
 
     const stats = [
       { label: "Total Hospitals", value: totalHospitals, icon: Hospital, color: "text-primary", bg: "bg-primary/10" },
       { label: "Total Doctors", value: totalDoctors, icon: Users, color: "text-secondary", bg: "bg-secondary/10" },
       { label: "ICU Beds", value: totalICU, icon: Bed, color: "text-[#eab308]", bg: "bg-[#eab308]/10" },
       { label: "General Beds", value: totalGeneral, icon: Bed, color: "text-success", bg: "bg-success/10" },
-      { label: "Avg Rating", value: avgRating, icon: Star, color: "text-[#eab308]", bg: "bg-[#eab308]/10" },
-      { label: "Active Emergencies", value: activeEmergencies, icon: AlertTriangle, color: "text-primary", bg: "bg-primary/10" },
     ];
 
     const bedData = hospitalData.map((h: any) => ({
@@ -179,7 +171,7 @@ const Dashboard = () => {
       doctors: h.doctors,
     }));
 
-    return { totalHospitals, totalDoctors, totalICU, totalGeneral, avgRating, activeEmergencies, bedData, typeDistribution, statusDistribution, doctorsPerHospital, stats };
+    return { totalHospitals, totalDoctors, totalICU, totalGeneral, bedData, typeDistribution, statusDistribution, doctorsPerHospital, stats };
   }, [hospitalData]);
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [userProfile, setUserProfile] = useState<ProfileData | null>(null);
@@ -563,40 +555,7 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </ChartCard>
 
-            {/* Ratings horizontal bar */}
-            <ChartCard title="Hospital Ratings" subtitle="Patient satisfaction scores">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  layout="vertical"
-                  data={hospitalData
-                    .map((h) => ({
-                      name: h.name.replace(/(Hospital|Medical|Institute|Wing)/gi, "").trim(),
-                      rating: h.rating,
-                    }))
-                    .sort((a, b) => b.rating - a.rating)}
-                  barSize={18}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    type="number"
-                    domain={[0, 5]}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={false}
-                    width={120}
-                  />
-                  <Tooltip {...tooltipStyle} />
-                  <Bar dataKey="rating" fill={COLORS.success} radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartCard>
+
           </motion.div>
         )}
 

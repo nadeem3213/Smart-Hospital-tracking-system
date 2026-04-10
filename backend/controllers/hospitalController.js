@@ -30,7 +30,6 @@ const createHospital = async (req, res) => {
       status,
       lat,
       lng,
-      rating,
       description,
       phone,
       email,
@@ -55,7 +54,6 @@ const createHospital = async (req, res) => {
       status,
       lat,
       lng,
-      rating,
       description,
       phone,
       email,
@@ -105,7 +103,7 @@ const updateHospital = async (req, res) => {
 
     const allowedFields = [
       "name", "type", "icuBeds", "generalBeds", "doctors",
-      "specialization", "status", "rating", "description",
+      "specialization", "status", "description",
       "phone", "email", "established", "specialties",
     ];
 

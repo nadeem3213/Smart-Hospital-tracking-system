@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import EditHospitalModal from "@/components/EditHospitalModal";
+import AddHospitalModal from "@/components/AddHospitalModal";
 import { useHospitals } from "@/hooks/useHospitals";
 import type { Hospital } from "@/data/hospitals";
 import { haversineDistance } from "@/lib/dijkstra";
@@ -36,7 +37,7 @@ import { AMBULANCE_POSITION } from "@/data/hospitals";
 
 type HospitalType = "all" | "government" | "private";
 type HospitalStatus = "all" | "available" | "busy" | "critical";
-type SortKey = "rating" | "distance" | "name";
+type SortKey = "distance" | "name";
 
 const statusStyles: Record<
   string,
@@ -79,44 +80,6 @@ function saveFavorites(favs: Set<string>) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Star rating renderer                                               */
-/* ------------------------------------------------------------------ */
-
-function RatingStars({ rating }: { rating: number }) {
-  const full = Math.floor(rating);
-  const hasHalf = rating - full >= 0.25 && rating - full < 0.75;
-  const empty = 5 - full - (hasHalf ? 1 : 0);
-
-  return (
-    <span className="inline-flex items-center gap-0.5">
-      {Array.from({ length: full }).map((_, i) => (
-        <Star
-          key={`f${i}`}
-          className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400"
-        />
-      ))}
-      {hasHalf && (
-        <span className="relative h-3.5 w-3.5">
-          <Star className="absolute inset-0 h-3.5 w-3.5 text-muted-foreground/40" />
-          <span className="absolute inset-0 overflow-hidden w-[50%]">
-            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-          </span>
-        </span>
-      )}
-      {Array.from({ length: empty }).map((_, i) => (
-        <Star
-          key={`e${i}`}
-          className="h-3.5 w-3.5 text-muted-foreground/40"
-        />
-      ))}
-      <span className="ml-1 text-xs font-mono text-muted-foreground">
-        {rating.toFixed(1)}
-      </span>
-    </span>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -127,7 +90,7 @@ const Hospitals = () => {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<HospitalType>("all");
   const [statusFilter, setStatusFilter] = useState<HospitalStatus>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("rating");
+  const [sortKey, setSortKey] = useState<SortKey>("distance");
   const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
   const [userPos, setUserPos] = useState<[number, number]>(AMBULANCE_POSITION);
   const [showFilters, setShowFilters] = useState(false);
@@ -209,7 +172,6 @@ const Hospitals = () => {
 
     // sort
     list = [...list].sort((a, b) => {
-      if (sortKey === "rating") return b.rating - a.rating;
       if (sortKey === "distance") return parseFloat(a.distance || "0") - parseFloat(b.distance || "0");
       return a.name.localeCompare(b.name);
     });
@@ -302,6 +264,11 @@ const Hospitals = () => {
                   className={`h-3 w-3 transition-transform ${showFilters ? "rotate-180" : ""}`}
                 />
               </Button>
+              {isAdmin && (
+                <div className="shrink-0 flex items-center">
+                  <AddHospitalModal />
+                </div>
+              )}
             </div>
 
             {/* Collapsible filter chips */}
@@ -364,11 +331,9 @@ const Hospitals = () => {
                       <span className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider">
                         Sort
                       </span>
-                      {(["rating", "distance", "name"] as SortKey[]).map((k) =>
+                      {(["distance", "name"] as SortKey[]).map((k) =>
                         pill(
-                          k === "rating"
-                            ? "⭐ Rating"
-                            : k === "distance"
+                          k === "distance"
                             ? "📍 Distance"
                             : "🏥 Name",
                           sortKey === k,
@@ -484,11 +449,6 @@ const Hospitals = () => {
                           </span>
                         </div>
                       </div>
-                    </div>
-
-                    {/* ── Rating ── */}
-                    <div className="mb-3">
-                      <RatingStars rating={hospital.rating} />
                     </div>
 
                     {/* ── Description ── */}

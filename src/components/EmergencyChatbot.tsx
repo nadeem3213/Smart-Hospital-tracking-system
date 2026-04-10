@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Activity, Navigation } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Sparkles, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_POSITION } from '@/config';
@@ -18,7 +18,7 @@ const EmergencyChatbot = () => {
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello. I am the Emergency AI Assistant. Please describe your symptoms and I will help you find the best nearby hospital.',
+      content: 'Hello. I am the MediRoute AI Assistant. Please describe your symptoms and I will route you to the best nearby hospital.',
     }
   ]);
   const [input, setInput] = useState('');
@@ -31,7 +31,7 @@ const EmergencyChatbot = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserPos([pos.coords.latitude, pos.coords.longitude]),
-        () => console.log("Location access denied. Using default Pune position.")
+        () => console.log("Location access denied. Using default position.")
       );
     }
   }, []);
@@ -50,7 +50,6 @@ const EmergencyChatbot = () => {
     const userMessage = input.trim();
     setInput('');
     
-    // Add user message to history
     const newMessages: Message[] = [
       ...messages,
       { id: Date.now().toString(), role: 'user', content: userMessage }
@@ -75,7 +74,6 @@ const EmergencyChatbot = () => {
         let replyText = data.reply;
         let routeSuggested;
 
-        // Parse for the [ROUTE: ...] token
         const routeRegex = /\[ROUTE:\s*(.+?)\]/i;
         const match = replyText.match(routeRegex);
         
@@ -99,7 +97,7 @@ const EmergencyChatbot = () => {
           {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: 'Sorry, I am having trouble connecting to the emergency database right now.',
+            content: 'I am having trouble connecting to my neural net right now. Please try again.',
           }
         ]);
       }
@@ -109,7 +107,7 @@ const EmergencyChatbot = () => {
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: 'Sorry, there was a network error reaching the assistant.',
+          content: 'Sorry, there was a network error reaching my servers.',
         }
       ]);
     } finally {
@@ -124,6 +122,7 @@ const EmergencyChatbot = () => {
 
   return (
     <>
+      {/* Target Trigger Button */}
       <div className="fixed bottom-6 right-6 z-[9999]">
         <AnimatePresence>
           {!isOpen && (
@@ -132,10 +131,16 @@ const EmergencyChatbot = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               onClick={() => setIsOpen(true)}
-              className="group relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-destructive to-red-500 text-white shadow-[0_8px_30px_rgb(220,38,38,0.4)] transition-all duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgb(220,38,38,0.6)] focus:outline-none"
+              className="group relative flex h-16 w-16 items-center justify-center rounded-full bg-background/30 backdrop-blur-md border border-white/20 shadow-[0_0_40px_-5px_rgba(139,92,246,0.3)] transition-all duration-500 hover:scale-105 hover:shadow-[0_0_50px_-5px_rgba(139,92,246,0.6)] focus:outline-none overflow-hidden"
             >
-              <Activity className="absolute inset-0 m-auto h-8 w-8 animate-ping text-white opacity-20 duration-1000" />
-              <MessageSquare className="h-7 w-7 z-10" />
+              {/* Spinning abstract gradient background representing AI */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 via-indigo-500 to-cyan-400 opacity-80" />
+              
+              {/* Inner glowing core */}
+              <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-300 blur-[8px] opacity-40 group-hover:opacity-80 transition-opacity" />
+              
+              <MessageSquare className="h-6 w-6 text-white z-10" />
+              <Sparkles className="absolute top-3 right-3 h-3 w-3 text-white/80 animate-pulse z-10" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -147,65 +152,65 @@ const EmergencyChatbot = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.2 } }}
-            className="fixed bottom-24 right-6 z-[9999] flex h-[550px] w-[380px] max-w-[calc(100vw-48px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-background/80 backdrop-blur-xl shadow-2xl sm:h-[600px] sm:w-[420px]"
+            className="fixed bottom-6 right-6 z-[9999] flex h-[600px] w-[400px] max-w-[calc(100vw-48px)] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-black/40 backdrop-blur-2xl shadow-[0_0_80px_-15px_rgba(0,0,0,0.5)]"
           >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-destructive to-red-500 px-5 py-4 flex items-center justify-between shadow-md relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/20 shadow-sm">
-                  <Activity className="h-5 w-5 text-white" />
+            {/* Glossy overlay for realism */}
+            <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-gradient-to-b from-white/5 to-transparent block" />
+
+            {/* AI Header */}
+            <div className="relative px-6 py-5 flex items-center justify-between border-b border-white/5">
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/5 border border-white/10 shadow-inner">
+                  <Bot className="h-5 w-5 text-indigo-300" />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-indigo-500 border-2 border-[#121212]" />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-indigo-400 animate-ping opacity-75" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white tracking-wide">Emergency AI</h3>
-                  <p className="text-xs text-red-100 mt-0.5 font-medium flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                    Symptom Triage & Routing
+                  <h3 className="font-semibold text-white tracking-wide text-sm flex items-center gap-1.5">
+                    MediRoute AI <Sparkles className="h-3 w-3 text-indigo-300" />
+                  </h3>
+                  <p className="text-[11px] text-indigo-200/60 font-mono tracking-wider mt-0.5 uppercase">
+                    Neural Triage Active
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="relative z-10 rounded-full p-2 text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+                className="relative z-10 rounded-full h-8 w-8 flex items-center justify-center bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all backdrop-blur-md"
                 aria-label="Close Chat"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-gradient-to-b from-transparent to-black/5 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6 custom-scrollbar relative">
               {messages.map((message) => (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] px-4 py-3 text-sm shadow-md backdrop-blur-sm ${
+                    className={`relative max-w-[85%] px-4 py-3 text-[13px] shadow-sm leading-relaxed ${
                       message.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm bg-gradient-to-br from-primary to-blue-600'
-                        : 'bg-card/80 border border-white/5 text-card-foreground rounded-2xl rounded-tl-sm'
+                        ? 'text-white rounded-2xl rounded-tr-sm bg-gradient-to-br from-indigo-500 to-violet-600'
+                        : 'bg-white/[0.03] border border-white/10 text-slate-200 rounded-2xl rounded-tl-sm backdrop-blur-md'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      {message.role === 'assistant' && (
-                        <div className="mt-0.5 shrink-0 bg-destructive/10 p-1 rounded-full">
-                          <Bot className="h-4 w-4 text-destructive" />
-                        </div>
-                      )}
-                      
-                      <div className="whitespace-pre-wrap leading-relaxed font-medium">
+                      <div className="whitespace-pre-wrap font-medium">
                         {message.content}
                         
                         {message.routeSuggested && (
-                          <div className="mt-4 pt-3 border-t border-border/50">
+                          <div className="mt-4 pt-4 border-t border-white/10">
                             <Button 
                               onClick={() => handleRouteClick(message.routeSuggested!)}
-                              className="w-full bg-gradient-to-r from-destructive to-red-500 hover:opacity-90 text-white gap-2 font-semibold shadow-sm transition-all"
+                              className="w-full bg-white/10 hover:bg-white/20 text-white gap-2 font-semibold shadow-sm transition-all rounded-xl border border-white/5 backdrop-blur-md"
                             >
-                              <Navigation className="h-4 w-4" />
+                              <Navigation className="h-4 w-4 text-indigo-300" />
                               Route to {message.routeSuggested}
                             </Button>
                           </div>
@@ -215,45 +220,56 @@ const EmergencyChatbot = () => {
                   </div>
                 </motion.div>
               ))}
+              
               {isLoading && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
-                  <div className="bg-card/80 backdrop-blur-sm border border-white/5 shadow-md rounded-2xl rounded-tl-sm px-5 py-4">
-                    <div className="flex items-center gap-1.5 h-4">
-                      <span className="w-2 h-2 bg-destructive/80 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-destructive/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-destructive/80 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
+                  <div className="bg-white/5 backdrop-blur-md border border-white/10 shadow-sm rounded-2xl rounded-tl-sm px-4 py-3.5 flex items-center gap-1.5 h-10 w-[72px]">
+                    <motion.div
+                      animate={{ y: [0, -5, 0], opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-2 h-2 rounded-full bg-indigo-400"
+                    />
+                    <motion.div
+                      animate={{ y: [0, -5, 0], opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
+                      className="w-2 h-2 rounded-full bg-indigo-400"
+                    />
+                    <motion.div
+                      animate={{ y: [0, -5, 0], opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                      className="w-2 h-2 rounded-full bg-indigo-400"
+                    />
                   </div>
                 </motion.div>
               )}
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-2" />
             </div>
 
             {/* Input Area */}
-            <div className="bg-card/60 backdrop-blur-xl p-4 border-t border-white/10 relative z-10">
+            <div className="p-4 relative z-10 bg-black/20 border-t border-white/5">
               <form
                 onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
+                   e.preventDefault();
+                   handleSend();
                 }}
-                className="flex items-center gap-3 relative"
+                className="flex items-center gap-2 relative bg-white/5 border border-white/10 rounded-full p-1.5 backdrop-blur-xl"
               >
-                <div className="relative flex-1">
+                <div className="flex-1 relative">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Describe your symptoms..."
-                    className="w-full rounded-2xl border border-white/10 bg-background/50 px-5 py-3.5 text-sm text-foreground focus:border-primary/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-inner"
+                    className="w-full bg-transparent px-4 py-2.5 text-[13px] text-white placeholder:text-white/40 focus:outline-none focus:ring-0"
                     disabled={isLoading}
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-blue-600 text-white shadow-lg disabled:opacity-50 transition-all hover:scale-105 hover:shadow-xl focus:outline-none"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-white disabled:opacity-30 disabled:bg-white/10 transition-all hover:bg-indigo-400 focus:outline-none"
                 >
-                  <Send className="h-5 w-5 ml-1" />
+                  <Send className="h-4 w-4 ml-0.5" />
                 </button>
               </form>
             </div>

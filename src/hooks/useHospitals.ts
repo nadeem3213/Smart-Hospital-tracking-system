@@ -66,7 +66,7 @@ export const useAddHospital = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newHospital: Omit<Hospital, "status" | "distance" | "eta" | "rating">) => {
+    mutationFn: async (newHospital: Omit<Hospital, "status" | "distance" | "eta">) => {
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
