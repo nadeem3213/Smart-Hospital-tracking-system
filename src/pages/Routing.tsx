@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle, ZoomControl } from "react-leaflet";
 import L from "leaflet";
@@ -146,6 +146,7 @@ const staggerContainer = {
 const Routing = () => {
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   const [roadRoutes, setRoadRoutes] = useState<RoadRoute[]>([]);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number>(0);
@@ -206,21 +207,32 @@ const Routing = () => {
     if (passedState?.selectedHospital && hospitalData.length > 0) {
       handleSelectHospital(passedState.selectedHospital);
       // Clear state so it doesn't re-trigger on refresh
-      window.history.replaceState({}, document.title);
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, hospitalData.length]);
+  }, [location.state, hospitalData.length, navigate, location.pathname]);
 
   const handleSelectHospital = useCallback(
     async (hospitalName: string) => {
-      setSelectedHospital(hospitalName);
       setSelectedRouteIndex(0);
       setRouteLoading(true);
 
-      const hospital = hospitalData.find((h) => h.name === hospitalName);
+      let hospital = hospitalData.find((h) => h.name === hospitalName);
+      if (!hospital) {
+        const cleanName = hospitalName.replace(/\*/g, '').trim().toLowerCase();
+        hospital = hospitalData.find((h) => h.name.toLowerCase() === cleanName);
+      }
+      if (!hospital) {
+        const cleanName = hospitalName.replace(/\*/g, '').trim().toLowerCase();
+        hospital = hospitalData.find((h) => h.name.toLowerCase().includes(cleanName) || cleanName.includes(h.name.toLowerCase()));
+      }
+
       if (!hospital) {
         setRouteLoading(false);
+        toast({ title: "Hospital Not Found", description: `Could not pinpoint "${hospitalName}" on the map.`, variant: "destructive" });
         return;
       }
+
+      setSelectedHospital(hospital.name);
 
       try {
         const routes = await fetchOSRMRoutes(userPosition, [hospital.lat, hospital.lng], travelMode);
