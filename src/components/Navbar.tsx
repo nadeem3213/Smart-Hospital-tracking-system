@@ -125,7 +125,9 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
           <Link to="/home" className="hover:text-foreground transition-colors">Home</Link>
-          <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
+          {!isAdmin && (
+            <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
+          )}
           <Link to="/hospitals" className="hover:text-foreground transition-colors">Hospitals</Link>
           <Link to="/routing" className="hover:text-foreground transition-colors">Routing</Link>
           {isAdmin && <Link to="/admin/users" className="hover:text-primary transition-colors text-primary/80 font-medium">User Profiles</Link>}
@@ -205,16 +207,18 @@ const Navbar = () => {
                   </div>
                 ))}
               </div>
-              <div className="border-t border-border px-4 py-2 text-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/dashboard")}
-                  className="w-full text-xs text-muted-foreground hover:text-foreground"
-                >
-                  View all notifications
-                </Button>
-              </div>
+              {!isAdmin && (
+                <div className="border-t border-border px-4 py-2 text-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate("/dashboard")}
+                    className="w-full text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    View all notifications
+                  </Button>
+                </div>
+              )}
             </PopoverContent>
           </Popover>
           <ThemeToggle />

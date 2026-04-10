@@ -31,15 +31,10 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
   Legend,
 } from "recharts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import UserActivityTable from "@/components/UserActivityTable";
 // Dynamic stats will be derived inside the component
 
 /* ─── palette ─── */
@@ -185,6 +180,10 @@ const Dashboard = () => {
 
     try {
       const parsed = JSON.parse(stored);
+      if (parsed.role === "admin") {
+        navigate("/home");
+        return;
+      }
       setUserName(parsed.name || null);
       setUserEmail(parsed.email || null);
     } catch {
@@ -332,7 +331,7 @@ const Dashboard = () => {
         )}
 
         {/* ── stats cards ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {stats.map((s, i) => (
             <motion.div
               key={s.label}
@@ -399,7 +398,7 @@ const Dashboard = () => {
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10"
           >
             {/* Bar – Bed availability */}
             <ChartCard title="Hospital Bed Availability" subtitle="ICU vs General beds per hospital">
@@ -408,13 +407,9 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={false}
                     axisLine={{ stroke: "hsl(var(--border))" }}
                     tickLine={false}
-                    interval={0}
-                    angle={-20}
-                    textAnchor="end"
-                    height={60}
                   />
                   <YAxis
                     tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
@@ -463,13 +458,9 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={false}
                     axisLine={{ stroke: "hsl(var(--border))" }}
                     tickLine={false}
-                    interval={0}
-                    angle={-20}
-                    textAnchor="end"
-                    height={60}
                   />
                   <YAxis
                     tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
@@ -481,35 +472,8 @@ const Dashboard = () => {
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
-
-            {/* Pie – Status distribution */}
-            <ChartCard title="Hospital Status Distribution" subtitle="Current availability overview">
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={statusDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={110}
-                    paddingAngle={4}
-                    dataKey="value"
-                    label={renderPieLabel}
-                    stroke="none"
-                  >
-                    {statusDistribution.map((_, i) => (
-                      <Cell key={i} fill={PIE_STATUS_COLORS[i % PIE_STATUS_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip {...tooltipStyle} />
-                  <Legend wrapperStyle={{ fontSize: 12, fontFamily: "monospace" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartCard>
           </motion.div>
         )}
-
-
 
         {activeTab === "performance" && (
           <motion.div
@@ -533,13 +497,9 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={false}
                     axisLine={{ stroke: "hsl(var(--border))" }}
                     tickLine={false}
-                    interval={0}
-                    angle={-20}
-                    textAnchor="end"
-                    height={60}
                   />
                   <YAxis
                     tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
@@ -559,16 +519,6 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* ── activity table ── */}
-        <motion.div
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="mb-6"
-        >
-          <UserActivityTable />
-        </motion.div>
       </main>
 
       <Footer />
