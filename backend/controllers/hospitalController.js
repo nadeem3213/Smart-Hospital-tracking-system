@@ -64,6 +64,8 @@ const createHospital = async (req, res) => {
     });
 
     if (hospital) {
+      const io = req.app.get("io");
+      if (io) io.emit("HOSPITAL_ADDED", hospital);
       res.status(201).json(hospital);
     } else {
       res.status(400).json({ message: "Invalid hospital data" });
@@ -114,6 +116,8 @@ const updateHospital = async (req, res) => {
     }
 
     const updated = await hospital.save();
+    const io = req.app.get("io");
+    if (io) io.emit("HOSPITAL_UPDATED", updated);
     res.json(updated);
   } catch (error) {
     console.error(error);
