@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, User, Activity, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { DEFAULT_POSITION } from '@/config';
 
 interface Message {
   id: string;
@@ -22,7 +23,7 @@ const EmergencyChatbot = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userPos, setUserPos] = useState<[number, number] | null>([18.5204, 73.8567]); // Default to Pune
+  const [userPos, setUserPos] = useState<[number, number] | null>(DEFAULT_POSITION);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 

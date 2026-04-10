@@ -8,21 +8,20 @@ import EditHospitalModal from "./EditHospitalModal";
 import { useHospitals } from "../hooks/useHospitals";
 import type { Hospital } from "../data/hospitals";
 import { haversineDistance } from "../lib/dijkstra";
-
-const AMBULANCE_POSITION: [number, number] = [18.5204, 73.8567]; // Pune
+import { DEFAULT_POSITION } from "../config";
 
 const HospitalDashboard = () => {
   const [filter, setFilter] = useState<"all" | "government" | "private">("all");
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingHospital, setEditingHospital] = useState<Hospital | null>(null);
-  const [userPos, setUserPos] = useState<[number, number]>(AMBULANCE_POSITION);
+  const [userPos, setUserPos] = useState<[number, number]>(DEFAULT_POSITION);
   const { data: hospitalData = [], isLoading } = useHospitals();
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserPos([pos.coords.latitude, pos.coords.longitude]),
-        () => setUserPos(AMBULANCE_POSITION)
+        () => setUserPos(DEFAULT_POSITION)
       );
     }
   }, []);
