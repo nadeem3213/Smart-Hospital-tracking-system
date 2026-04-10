@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Bed, UserCheck, Clock, ArrowRight, Building2, Landmark, Pencil } from "lucide-react";
+import { MapPin, Bed, UserCheck, Clock, ArrowRight, Building2, Landmark, Pencil, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +16,7 @@ interface HospitalCardProps {
   index: number;
   isAdmin?: boolean;
   onEdit?: () => void;
+  phone?: string;
 }
 
 const statusStyles: Record<string, { bg: string; text: string; label: string }> = {
@@ -25,7 +26,7 @@ const statusStyles: Record<string, { bg: string; text: string; label: string }> 
 };
 
 const HospitalCard = ({
-  name, type, distance, eta, icuBeds, generalBeds, doctors, specialization, status, index, isAdmin, onEdit,
+  name, type, distance, eta, icuBeds, generalBeds, doctors, specialization, status, index, isAdmin, onEdit, phone,
 }: HospitalCardProps) => {
   const s = statusStyles[status];
   const navigate = useNavigate();
@@ -67,6 +68,11 @@ const HospitalCard = ({
           <span className="flex items-center gap-1 shrink-0">
             <Clock className="h-3 w-3" /> ETA {eta}
           </span>
+          {phone && (
+            <span className="flex items-center gap-1 shrink-0">
+              <Phone className="h-3 w-3 text-primary/70" /> {phone}
+            </span>
+          )}
         </div>
       </div>
 

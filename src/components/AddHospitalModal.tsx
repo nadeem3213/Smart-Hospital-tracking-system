@@ -37,9 +37,9 @@ const AddHospitalModal = () => {
   const [name, setName] = useState("");
   const [type, setType] = useState<"government" | "private">("private");
   const [specialization, setSpecialization] = useState("");
-  const [icuBeds, setIcuBeds] = useState(0);
-  const [generalBeds, setGeneralBeds] = useState(0);
-  const [doctors, setDoctors] = useState(0);
+  const [icuBeds, setIcuBeds] = useState<number | "">("");
+  const [generalBeds, setGeneralBeds] = useState<number | "">("");
+  const [doctors, setDoctors] = useState<number | "">("");
   
   // Map/Location State
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,9 +82,9 @@ const AddHospitalModal = () => {
     const newHospital = {
       name,
       type,
-      icuBeds,
-      generalBeds,
-      doctors,
+      icuBeds: icuBeds || 0,
+      generalBeds: generalBeds || 0,
+      doctors: doctors || 0,
       specialization,
       lat: position[0],
       lng: position[1],
@@ -102,9 +102,9 @@ const AddHospitalModal = () => {
         // Reset form
         setName("");
         setSpecialization("");
-        setIcuBeds(0);
-        setGeneralBeds(0);
-        setDoctors(0);
+        setIcuBeds("");
+        setGeneralBeds("");
+        setDoctors("");
       },
       onError: (err: any) => {
         toast({ title: "Failed to add", description: err.message, variant: "destructive" });
@@ -155,15 +155,15 @@ const AddHospitalModal = () => {
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-2">
                 <Label className="text-[10px] font-mono text-muted-foreground uppercase">ICU Beds</Label>
-                <Input type="number" min="0" required value={icuBeds} onChange={e => setIcuBeds(parseInt(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
+                <Input type="number" min="0" required value={icuBeds} onChange={e => setIcuBeds(e.target.value === "" ? "" : parseInt(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-mono text-muted-foreground uppercase">Gen Beds</Label>
-                <Input type="number" min="0" required value={generalBeds} onChange={e => setGeneralBeds(parseInt(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
+                <Input type="number" min="0" required value={generalBeds} onChange={e => setGeneralBeds(e.target.value === "" ? "" : parseInt(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-mono text-muted-foreground uppercase">Doctors</Label>
-                <Input type="number" min="0" required value={doctors} onChange={e => setDoctors(parseInt(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
+                <Input type="number" min="0" required value={doctors} onChange={e => setDoctors(e.target.value === "" ? "" : parseInt(e.target.value) || 0)} className="bg-muted/50 border-border font-mono" />
               </div>
             </div>
             
