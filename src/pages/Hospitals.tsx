@@ -523,7 +523,7 @@ const Hospitals = () => {
                       </span>
                     </div>
 
-                    {/* ── Contact & Established ── */}
+                    {/* ── Contact ── */}
                     <div className="space-y-1.5 mb-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Phone className="h-3 w-3 shrink-0" />
@@ -535,15 +535,6 @@ const Hospitals = () => {
                         <Mail className="h-3 w-3 shrink-0" />
                         <span className="font-mono truncate">
                           {hospital.email}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3 shrink-0" />
-                        <span>
-                          Est.{" "}
-                          <span className="font-mono font-semibold text-foreground">
-                            {hospital.established}
-                          </span>
                         </span>
                       </div>
                     </div>

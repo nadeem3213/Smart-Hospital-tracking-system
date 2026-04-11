@@ -108,20 +108,23 @@ const Navbar = () => {
       className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl"
     >
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Activity className="h-5 w-5 text-primary" />
-            <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
+        <Link 
+          to="/home" 
+          className="flex items-center gap-2 sm:gap-3 group transition-transform hover:scale-105 active:scale-95"
+        >
+          <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 shadow-sm group-hover:shadow-primary/20 group-hover:border-primary/30 transition-all duration-300">
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary group-hover:animate-pulse" />
+            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-primary ring-2 ring-background shadow-sm" />
           </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-wide text-foreground">
+          <div className="flex flex-col">
+            <h1 className="text-[13px] sm:text-sm font-black tracking-wider text-foreground group-hover:text-primary transition-colors">
               MEDI<span className="text-primary">ROUTE</span>
             </h1>
-            <p className="text-[10px] font-mono text-muted-foreground tracking-widest">
+            <p className="hidden sm:block text-[9px] font-mono text-muted-foreground tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
               EMERGENCY DISPATCH
             </p>
           </div>
-        </div>
+        </Link>
 
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
           <Link to="/home" className="hover:text-foreground transition-colors">Home</Link>
